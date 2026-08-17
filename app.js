@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
+<<<<<<< HEAD
     // --- AUTHENTICATION CHECK (Only appears 1st time) ---
     const authOverlay = document.getElementById('auth-overlay');
     const authUsernameInput = document.getElementById('auth-username');
@@ -83,6 +84,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- UI MODAL ENGINE ---
+=======
+    document.getElementById('db-status-text').innerHTML = `Cloud Sync Active.<br>Connected to Firebase.`;
+
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     const UI = {
         modal: document.getElementById('custom-modal'), title: document.getElementById('modal-title'), desc: document.getElementById('modal-desc'),
         input: document.getElementById('modal-input'), searchWrapper: document.getElementById('modal-search-wrapper'), searchInput: document.getElementById('modal-search-input'),
@@ -202,6 +207,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const openProfile = async (type, name) => {
         const allSongs = await window.Storage.getAllSongs();
         let targetSongs = [];
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         if (type === 'artist') {
             targetSongs = allSongs.filter(s => s.artist.toLowerCase() === name.toLowerCase());
         } else if (type === 'vibe' || type === 'genre') {
@@ -219,7 +228,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     document.getElementById('btn-back-profile').addEventListener('click', () => navigateTo('page-home'));
+<<<<<<< HEAD
     document.getElementById('player-artist').addEventListener('click', (e) => { openProfile('artist', e.target.innerText); });
+=======
+    
+    document.getElementById('player-artist').addEventListener('click', (e) => {
+        openProfile('artist', e.target.innerText);
+    });
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
 
     document.getElementById('search-input').addEventListener('input', async (e) => {
         const q = e.target.value.toLowerCase();
@@ -231,7 +247,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         filtered.forEach((song, idx) => searchResults.appendChild(createSongCard(song, filtered, idx, false)));
     });
 
+<<<<<<< HEAD
     // --- AESTHETIC 3-DOTS ACTION SHEET WITH FEATURES ---
+=======
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     window.ActionSheet = {
         sheet: document.getElementById('action-sheet'), currentSong: null,
         open(song, fromEditor = false) {
@@ -239,7 +258,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('sheet-title').innerText = song.title; document.getElementById('sheet-artist').innerText = song.artist;
             document.getElementById('sheet-art').src = song.artBase64 || '';
             const isLiked = window.Storage.isLiked(song.id);
+<<<<<<< HEAD
             document.getElementById('sheet-btn-like').innerHTML = `<svg class="icon"><use href="${isLiked ? '#icon-heart-filled' : '#icon-heart-outline'}"></use></svg> <span>${isLiked ? 'Unlike Song' : 'Like Song'}</span>`;
+=======
+            document.getElementById('sheet-btn-like').innerHTML = `<svg class="icon"><use href="${isLiked ? '#icon-heart-filled' : '#icon-heart-outline'}"></use></svg> <span style="color:${isLiked ? '#fff' : '#fff'}">${isLiked ? 'Unlike' : 'Like'}</span>`;
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
             document.getElementById('sheet-btn-delete').classList.toggle('hidden', !fromEditor);
             this.sheet.classList.remove('hidden');
         },
@@ -254,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.ActionSheet.close(); openProfile('artist', artist);
     });
 
+<<<<<<< HEAD
     document.getElementById('sheet-btn-party').addEventListener('click', () => {
         const song = window.ActionSheet.currentSong;
         window.ActionSheet.close();
@@ -271,6 +295,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert("Song info copied to clipboard!");
     });
 
+=======
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     document.getElementById('sheet-btn-add').addEventListener('click', async () => {
         window.ActionSheet.close();
         const pls = window.Storage.getPlaylists();
@@ -288,7 +314,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(await UI.show({ title: 'Delete Song?', desc: 'Remove from Firebase?' })) { await window.Storage.deleteSong(window.ActionSheet.currentSong.id); renderSongs(); }
     });
 
+<<<<<<< HEAD
     // --- PLAYLISTS ---
+=======
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     const renderLikedCount = () => { document.getElementById('liked-count').innerText = `${window.Storage.getLikedSongs().length} songs`; };
 
     const renderPlaylists = () => {
@@ -364,15 +393,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             artBase64 = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(artFile); });
         }
 
+<<<<<<< HEAD
+=======
+        // Show uploading prompt since cloud uploads take a second
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         UI.show({ title: 'Uploading...', desc: 'Sending to Firebase. Please wait...', type: 'notice' });
 
         try {
             await window.Storage.saveSong({ id: Date.now().toString(), title, artist: artist || 'Unknown', genre: genre || 'unknown', vibe: vibe || 'unknown', audioFile, artBase64 });
+<<<<<<< HEAD
             UI.show({ title: 'Success', desc: 'Added to Cloud Database!' });
             ['edit-audio', 'edit-art', 'edit-title', 'edit-artist', 'edit-genre', 'edit-vibe'].forEach(id => document.getElementById(id).value = '');
             renderSongs();
         } catch(err) {
             UI.show({ title: 'Upload Failed', desc: 'Check your Firebase rules.' });
+=======
+            UI.show({ title: 'Success', desc: 'Uploaded to Cloud!' });
+            ['edit-audio', 'edit-art', 'edit-title', 'edit-artist', 'edit-genre', 'edit-vibe'].forEach(id => document.getElementById(id).value = '');
+            renderSongs();
+        } catch(err) {
+            UI.show({ title: 'Upload Failed', desc: 'Failed to connect to Firebase.' });
+            console.error(err);
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         }
     });
 

@@ -112,6 +112,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10p
 .modal-box { width: 90%; max-width: 350px; padding: 24px; margin: auto; background: #0a0a0a; border-radius: 16px; border: 1px solid #222; transform: scale(1); transition: transform 0.2s; }
 .modal-overlay.hidden .modal-box { transform: scale(0.95); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 24px; }
+<<<<<<< HEAD
 
 /* AUTH SCREEN OVERLAY */
 .auth-overlay {
@@ -119,3 +120,5 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 10p
     background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
 }
 .auth-box { width: 100%; max-width: 380px; background: #080808; border: 1px solid #1a1a1a; border-radius: 20px; padding: 30px; }
+=======
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6

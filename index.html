@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sway</title>
+<<<<<<< HEAD
+=======
+    <link rel="manifest" href="manifest.json">
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<<<<<<< HEAD
+=======
+    <!-- SVG ICON LIBRARY -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
     <svg style="display: none;">
         <symbol id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
         <symbol id="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
@@ -26,6 +34,7 @@
 
     <div class="home-bg"></div>
 
+<<<<<<< HEAD
     <!-- AUTH SCREEN (Only Appears 1st Time) -->
     <div id="auth-overlay" class="auth-overlay hidden">
         <div class="auth-box">
@@ -41,6 +50,11 @@
 
     <div id="app-container">
         
+=======
+    <div id="app-container">
+        
+        <!-- HOME PAGE -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <main id="page-home" class="page active">
             <header class="page-header"><h1 class="brand-title">Sway</h1></header>
             <section class="content-section mb-4">
@@ -51,12 +65,20 @@
             </section>
         </main>
 
+<<<<<<< HEAD
+=======
+        <!-- GENRES PAGE -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <main id="page-genres" class="page">
             <button id="btn-back-genres" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
             <header class="page-header"><h1 class="brand-title">Discover</h1></header>
             <div class="pill-container" id="genres-list"></div>
         </main>
 
+<<<<<<< HEAD
+=======
+        <!-- SEARCH PAGE -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <main id="page-search" class="page">
             <header class="search-header">
                 <div class="search-bar-minimal">
@@ -67,6 +89,7 @@
             <div id="search-results" class="song-list mt-4"></div>
         </main>
 
+<<<<<<< HEAD
         <!-- PARTY PAGE (New Feature) -->
         <main id="page-party" class="page">
             <header class="page-header"><h1 class="brand-title">Party Mode</h1></header>
@@ -79,6 +102,9 @@
             <div id="party-queue-list" class="song-list"></div>
         </main>
 
+=======
+        <!-- PLAYLISTS PAGE -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <main id="page-playlists" class="page">
             <header class="header-flex page-header">
                 <h1 class="brand-title">Library</h1>
@@ -92,9 +118,17 @@
 
             <div id="playlist-list" class="song-list mt-4"></div>
             
+<<<<<<< HEAD
             <div id="playlist-view" class="hidden">
                 <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
                 <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
+=======
+            <!-- Playlist View -->
+            <div id="playlist-view" class="hidden">
+                <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
+                <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
+                
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
                 <div class="playlist-controls header-flex mb-4">
                     <button id="btn-play-playlist" class="btn-primary small">Play</button>
                     <div style="display:flex; gap: 8px;">
@@ -103,11 +137,19 @@
                         <button id="btn-pl-smart" class="icon-btn state-btn"><svg class="icon"><use href="#icon-sparkle"></use></svg></button>
                     </div>
                 </div>
+<<<<<<< HEAD
+=======
+                
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
                 <button id="btn-add-to-playlist" class="btn-minimal block mb-4">Add Songs</button>
                 <div id="playlist-view-songs" class="song-list"></div>
             </div>
         </main>
 
+<<<<<<< HEAD
+=======
+        <!-- DYNAMIC PROFILE PAGES (Artist / Genre) -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <main id="page-profile" class="page">
             <button id="btn-back-profile" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
             <p id="profile-subtitle" class="sub-text">CATEGORY</p>
@@ -118,6 +160,7 @@
             <div id="profile-song-list" class="song-list"></div>
         </main>
 
+<<<<<<< HEAD
         <main id="page-settings" class="page">
             <header class="page-header"><h1 class="brand-title">Settings</h1></header>
             <div class="settings-content">
@@ -136,16 +179,49 @@
                 <label class="sub-text block mb-4">Upload MP3</label>
                 <input type="file" id="edit-art" accept="image/*" class="input-line">
                 <label class="sub-text block mb-4">Upload Cover (Optional)</label>
+=======
+        <!-- SETTINGS PAGE -->
+        <main id="page-settings" class="page">
+            <header class="page-header"><h1 class="brand-title">Settings</h1></header>
+            <div class="settings-content">
+                <div class="info-card minimal-border">
+                    <p><strong>Database Status</strong></p>
+                    <p class="sub-text" id="db-status-text">Local Storage Active.<br>Awaiting backend migration.</p>
+                </div>
+                <div id="btn-dev-access" class="dev-card minimal-border mt-4">Developer Login</div>
+            </div>
+        </main>
+
+        <!-- EDITOR PAGE -->
+        <main id="page-editor" class="page">
+            <header class="page-header"><h1 class="brand-title">Editor</h1></header>
+            
+            <div class="editor-card minimal-border mb-4">
+                <input type="file" id="edit-audio" accept="audio/*" class="input-line">
+                <label class="sub-text block mb-4">Upload MP3</label>
+                
+                <input type="file" id="edit-art" accept="image/*" class="input-line">
+                <label class="sub-text block mb-4">Upload Cover (Optional)</label>
+                
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
                 <input type="text" id="edit-title" placeholder="Song Title" class="input-line">
                 <input type="text" id="edit-artist" placeholder="Artist Name" class="input-line">
                 <input type="text" id="edit-genre" placeholder="Genre (e.g. Hip Hop, 90s)" class="input-line">
                 <input type="text" id="edit-vibe" placeholder="Vibe (e.g. Punjabi, Phonk, Sad)" class="input-line">
+<<<<<<< HEAD
                 <button id="btn-save-song" class="btn-primary mt-4">Add Song</button>
             </div>
+=======
+                
+                <button id="btn-save-song" class="btn-primary mt-4">Add Song</button>
+            </div>
+
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
             <div class="search-bar-minimal mb-4">
                 <svg class="icon"><use href="#icon-search"></use></svg>
                 <input type="text" id="editor-search-input" placeholder="Search database to edit/delete...">
             </div>
+<<<<<<< HEAD
             <div id="editor-song-list" class="song-list"></div>
         </main>
 
@@ -153,13 +229,32 @@
             <button class="nav-btn active" data-target="page-home">Home</button>
             <button class="nav-btn" data-target="page-search">Search</button>
             <button class="nav-btn" data-target="page-party">Party</button>
+=======
+
+            <div id="editor-song-list" class="song-list"></div>
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav id="bottom-nav">
+            <button class="nav-btn active" data-target="page-home">Home</button>
+            <button class="nav-btn" data-target="page-search">Search</button>
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
             <button class="nav-btn" data-target="page-playlists">Library</button>
             <button class="nav-btn" data-target="page-settings">Settings</button>
             <button class="nav-btn hidden" id="nav-editor" data-target="page-editor">Editor</button>
         </nav>
 
+<<<<<<< HEAD
         <div id="main-player" class="hidden">
             <div class="player-art-wrap"><img id="player-art" src="" alt="Art"></div>
+=======
+        <!-- MAIN HORIZONTAL PLAYER -->
+        <div id="main-player" class="hidden">
+            <div class="player-art-wrap">
+                <img id="player-art" src="" alt="Art">
+            </div>
+            
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
             <div class="player-controls-wrap">
                 <div class="player-info-row">
                     <div class="player-text">
@@ -171,10 +266,22 @@
                         <button id="btn-player-more" class="icon-btn" style="padding: 4px;"><svg class="icon"><use href="#icon-more"></use></svg></button>
                     </div>
                 </div>
+<<<<<<< HEAD
                 <div class="progress-container">
                     <input type="range" id="progress-bar" value="0" max="100">
                     <div class="time-info"><span id="current-time">0:00</span><span id="duration">-:-</span></div>
                 </div>
+=======
+                
+                <div class="progress-container">
+                    <input type="range" id="progress-bar" value="0" max="100">
+                    <div class="time-info">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">-:-</span>
+                    </div>
+                </div>
+                
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
                 <div class="controls-row">
                     <button id="btn-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
                     <button id="btn-prev" class="icon-btn"><svg class="icon"><use href="#icon-prev"></use></svg></button>
@@ -185,7 +292,11 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <!-- AESTHETIC 3-DOTS ACTION SHEET WITH MORE FEATURES -->
+=======
+        <!-- 3-DOTS ACTION SHEET -->
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
         <div id="action-sheet" class="modal-overlay hidden">
             <div class="sheet-content">
                 <div class="sheet-header">
@@ -193,12 +304,19 @@
                     <div><h4 id="sheet-title">Title</h4><p id="sheet-artist" class="sub-text">Artist</p></div>
                 </div>
                 <div class="sheet-options">
+<<<<<<< HEAD
                     <button id="sheet-btn-like" class="sheet-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg> <span>Like Song</span></button>
                     <button id="sheet-btn-artist" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>View Artist Profile</span></button>
                     <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-play"></use></svg> <span>Add to Playlist</span></button>
                     <button id="sheet-btn-party" class="sheet-btn"><svg class="icon"><use href="#icon-sparkle"></use></svg> <span>Add to Party Queue</span></button>
                     <button id="sheet-btn-share" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>Copy Song Info</span></button>
                     <button id="sheet-btn-delete" class="sheet-btn hidden delete-red"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Database</span></button>
+=======
+                    <button id="sheet-btn-like" class="sheet-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg> <span>Like</span></button>
+                    <button id="sheet-btn-artist" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>View Artist</span></button>
+                    <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-play"></use></svg> <span>Add to Playlist</span></button>
+                    <button id="sheet-btn-delete" class="sheet-btn hidden delete-red"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from App</span></button>
+>>>>>>> 20264fdcea4aa13203d6635fb3c245e77e5264e6
                 </div>
                 <button id="sheet-btn-close" class="btn-minimal mt-4 block center">Cancel</button>
             </div>

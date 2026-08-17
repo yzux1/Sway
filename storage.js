@@ -84,40 +84,45 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        // Cache locally first so it appears instantly on this device
-        const localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+        // 1. Permanently save to local cache so it never disappears
+        let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
         localSongs.push({ ...songData, artBase64: songData.artUrl });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        // Save globally to Firebase Firestore so other devices receive it
+        // 2. Try to save to Firebase cloud in the background
         try {
             await setDoc(doc(db, "songs", songData.id), songData);
         } catch (err) {
-            console.error("Firebase sync error:", err);
+            console.warn("Cloud backup skipped, saved locally:", err);
         }
     },
 
     async getAllSongs() {
-        let songs = [];
+        // Always load local songs first for instant, permanent display
+        let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+
+        // Try fetching updates from Firebase cloud safely without wiping local cache
         try {
             const querySnapshot = await getDocs(collection(db, "songs"));
+            const cloudSongs = [];
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
-                songs.push({ ...data, artBase64: data.artUrl });
+                cloudSongs.push({ ...data, artBase64: data.artUrl });
             });
-            if (songs.length > 0) {
-                localStorage.setItem('sway_global_songs', JSON.stringify(songs));
+
+            // If cloud has items, merge them with local songs so nothing is ever lost
+            if (cloudSongs.length > 0) {
+                const map = new Map();
+                // Combine both lists, prioritizing unique IDs
+                [...localSongs, ...cloudSongs].forEach(s => map.set(s.id, s));
+                localSongs = Array.from(map.values());
+                localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
             }
         } catch (err) {
-            console.warn("Using local cache due to Firebase read restriction:", err);
+            console.warn("Using permanent local storage cache:", err);
         }
 
-        // Fallback to local cache if Firebase is unreachable or blocked by rules
-        if (songs.length === 0) {
-            songs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
-        }
-
-        return songs.sort((a, b) => a.timestamp - b.timestamp);
+        return localSongs.sort((a, b) => a.timestamp - b.timestamp);
     },
 
     async incrementPlay(id) {

@@ -6,6 +6,24 @@ body { background: #000; color: #fff; overflow-x: hidden; }
 .mt-4 { margin-top: 16px; }
 .mb-4 { margin-bottom: 16px; }
 
+/* Splash Screen Animation */
+.splash-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center;
+    animation: fadeOutSplash 0.5s ease 1.5s forwards;
+}
+.splash-title {
+    font-family: 'Outfit', sans-serif; font-size: 48px; font-weight: 700; color: #fff;
+    letter-spacing: -1px; animation: scaleInSplash 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes scaleInSplash {
+    0% { transform: scale(0.7); opacity: 0; filter: blur(10px); }
+    100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+@keyframes fadeOutSplash {
+    to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
 .auth-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;

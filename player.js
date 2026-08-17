@@ -87,7 +87,6 @@ window.Player = {
 
         this.updatePlayPauseIcon();
         this.updatePlayerLikeIcon();
-        window.Storage.incrementPlay(song.id);
 
         // Update Notification Bar / Lock Screen Metadata
         if ('mediaSession' in navigator) {

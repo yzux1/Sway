@@ -24,7 +24,6 @@ window.Storage = {
         const url = `${FIRESTORE_REST_URL}/users/${cleanUser}`;
         
         try {
-            // Check if user exists
             const checkRes = await fetch(url);
             if (checkRes.ok) {
                 const data = await checkRes.json();
@@ -40,7 +39,6 @@ window.Storage = {
                 createdAt: Date.now()
             };
 
-            // Save user via REST API
             const saveRes = await fetch(url, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -48,15 +46,16 @@ window.Storage = {
                     fields: {
                         username: { stringValue: userData.username },
                         password: { stringValue: userData.password },
-                        playlists: { arrayValue: { values: [] } },
-                        likedSongs: { arrayValue: { values: [] } },
-                        history: { arrayValue: { values: [] } },
-                        createdAt: { integerValue: userData.createdAt.toString() }
+                        createdAt: { stringValue: String(userData.createdAt) }
                     }
                 })
             });
 
-            if (!saveRes.ok) throw new Error("Failed to create profile in cloud.");
+            if (!saveRes.ok) {
+                const errBody = await saveRes.text();
+                console.error("Firebase REST Error:", errBody);
+                throw new Error("Cloud rejected profile creation. Check Firestore rules.");
+            }
 
             localStorage.setItem('sway_current_user', JSON.stringify(userData));
             return userData;
@@ -77,16 +76,11 @@ window.Storage = {
             const storedPassword = doc.fields.password.stringValue;
             if (storedPassword !== password) throw new Error("Incorrect password!");
 
-            const playlists = (doc.fields.playlists.arrayValue.values || []).map(v => {
-                // simple mapper for saved arrays if needed
-                return v.stringValue || v;
-            });
-
             const userData = {
                 username: doc.fields.username.stringValue,
                 password: storedPassword,
                 playlists: [],
-                likedSongs: (doc.fields.likedSongs.arrayValue.values || []).map(v => v.stringValue),
+                likedSongs: [],
                 history: []
             };
 
@@ -101,22 +95,6 @@ window.Storage = {
         if (!user) return;
         user[field] = data;
         localStorage.setItem('sway_current_user', JSON.stringify(user));
-        
-        try {
-            const cleanUser = user.username.toLowerCase().trim();
-            const url = `${FIRESTORE_REST_URL}/users/${cleanUser}`;
-            
-            // Partial update using updateMask
-            await fetch(`${url}?updateMask.fieldPaths=${field}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fields: {
-                        [field]: { arrayValue: { values: data.map(item => ({ stringValue: String(item) })) } }
-                    }
-                })
-            });
-        } catch(e) { console.error("Sync error", e); }
     },
     async saveSong(song) {
         const audioFormData = new FormData();
@@ -155,10 +133,10 @@ window.Storage = {
                     artist: { stringValue: song.artist },
                     genre: { stringValue: (song.genre || 'unknown').toLowerCase().trim() },
                     vibe: { stringValue: (song.vibe || 'unknown').toLowerCase().trim() },
-                    plays: { integerValue: "0" },
+                    plays: { stringValue: "0" },
                     audioUrl: { stringValue: audioData.secure_url },
                     artUrl: { stringValue: artUrl },
-                    timestamp: { integerValue: song.id }
+                    timestamp: { stringValue: String(song.id) }
                 }
             })
         });
@@ -178,10 +156,10 @@ window.Storage = {
                     artist: f.artist ? f.artist.stringValue : '',
                     genre: f.genre ? f.genre.stringValue : 'unknown',
                     vibe: f.vibe ? f.vibe.stringValue : 'unknown',
-                    plays: f.plays ? parseInt(f.plays.integerValue || 0) : 0,
+                    plays: f.plays ? parseInt(f.plays.stringValue || 0) : 0,
                     audioUrl: f.audioUrl ? f.audioUrl.stringValue : '',
                     artBase64: f.artUrl ? f.artUrl.stringValue : '',
-                    timestamp: f.timestamp ? parseInt(f.timestamp.integerValue || Date.now()) : Date.now()
+                    timestamp: f.timestamp ? parseInt(f.timestamp.stringValue || Date.now()) : Date.now()
                 };
             });
             return songs.sort((a, b) => a.timestamp - b.timestamp);
@@ -193,11 +171,11 @@ window.Storage = {
             const res = await fetch(url);
             if(res.ok) {
                 const doc = await res.json();
-                const currentPlays = parseInt(doc.fields.plays?.integerValue || 0);
+                const currentPlays = parseInt(doc.fields.plays?.stringValue || 0);
                 await fetch(`${url}?updateMask.fieldPaths=plays`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fields: { plays: { integerValue: String(currentPlays + 1) } } })
+                    body: JSON.stringify({ fields: { plays: { stringValue: String(currentPlays + 1) } } })
                 });
             }
         } catch(e){}
@@ -214,7 +192,7 @@ window.Storage = {
                 fields: {
                     from: { stringValue: fromUser },
                     status: { stringValue: 'pending' },
-                    timestamp: { integerValue: String(Date.now()) }
+                    timestamp: { stringValue: String(Date.now()) }
                 }
             })
         });

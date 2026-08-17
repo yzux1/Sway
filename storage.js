@@ -1,9 +1,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false }
+});
 
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
@@ -71,7 +73,6 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        // Save locally first for instant UI response
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
         localSongs.push({ 
             id: songData.id,
@@ -86,10 +87,9 @@ window.Storage = {
         });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        // Send to Supabase using standard upsert
-        const { error } = await supabase.from('songs').upsert([songData]);
+        const { error } = await supabase.from('songs').insert(songData);
         if (error) {
-            console.error("Supabase error detail:", error);
+            console.error("Supabase insert error:", error);
             throw new Error(error.message || "Cloud save failed");
         }
     },
@@ -118,7 +118,7 @@ window.Storage = {
                 localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
             }
         } catch (err) {
-            console.warn("Using local cache");
+            console.warn("Using local cache fallback");
         }
 
         return localSongs.sort((a, b) => a.timestamp - b.timestamp);
@@ -135,7 +135,7 @@ window.Storage = {
 
     async deleteSong(id) {
         try {
-            await supabase.from('songs').delete().match({ id: String(id) });
+            await supabase.from('songs').delete().eq('id', String(id));
         } catch (e) {}
 
         let globalSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');

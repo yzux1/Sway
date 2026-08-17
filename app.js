@@ -358,7 +358,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!audioFile || !title) return alert('Audio and Title are required.');
 
         const btnSave = document.getElementById('btn-save-song');
-        btnSave.innerText = "Uploading to Cloud (Please wait)...";
         btnSave.disabled = true;
 
         try {
@@ -376,6 +375,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 vibe: vibe || 'unknown', 
                 audioFile, 
                 artBase64 
+            }, (progress) => {
+                btnSave.innerText = `Uploading: ${progress.loadedMB}MB / ${progress.totalMB}MB (${progress.percent}%)`;
             });
 
             alert('Success! Song added to Cloud Database.');

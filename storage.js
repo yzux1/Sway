@@ -40,11 +40,18 @@ function uploadWithProgress(file, onProgress) {
                 try {
                     const res = JSON.parse(xhr.responseText);
                     resolve(res.secure_url);
-                } catch (err) { reject(new Error("Parse error")); }
-            } else { reject(new Error("Upload failed")); }
+                } catch (err) { reject(new Error("Cloudinary JSON parse error")); }
+            } else { 
+                try {
+                    const errRes = JSON.parse(xhr.responseText);
+                    reject(new Error(errRes.error?.message || "Upload failed"));
+                } catch(e) {
+                    reject(new Error("Cloudinary upload failed with status " + xhr.status)); 
+                }
+            }
         };
 
-        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.onerror = () => reject(new Error("Network connection error during upload"));
         xhr.send(formData);
     });
 }
@@ -56,9 +63,13 @@ window.Storage = {
 
         let artUrl = '';
         if (song.artBase64) {
-            const res = await fetch(song.artBase64);
-            const blob = await res.blob();
-            artUrl = await uploadWithProgress(blob, null);
+            try {
+                const res = await fetch(song.artBase64);
+                const blob = await res.blob();
+                artUrl = await uploadWithProgress(blob, null);
+            } catch(e) {
+                artUrl = song.artBase64;
+            }
         }
 
         const songData = {
@@ -73,32 +84,59 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        // Save globally to Firebase Firestore so all devices worldwide receive it
-        await setDoc(doc(db, "songs", songData.id), songData);
+        // Cache locally first so it appears instantly on this device
+        const localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+        localSongs.push({ ...songData, artBase64: songData.artUrl });
+        localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
+
+        // Save globally to Firebase Firestore so other devices receive it
+        try {
+            await setDoc(doc(db, "songs", songData.id), songData);
+        } catch (err) {
+            console.error("Firebase sync error:", err);
+        }
     },
 
     async getAllSongs() {
+        let songs = [];
         try {
             const querySnapshot = await getDocs(collection(db, "songs"));
-            const songs = [];
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 songs.push({ ...data, artBase64: data.artUrl });
             });
-            return songs.sort((a, b) => a.timestamp - b.timestamp);
+            if (songs.length > 0) {
+                localStorage.setItem('sway_global_songs', JSON.stringify(songs));
+            }
         } catch (err) {
-            return [];
+            console.warn("Using local cache due to Firebase read restriction:", err);
         }
+
+        // Fallback to local cache if Firebase is unreachable or blocked by rules
+        if (songs.length === 0) {
+            songs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+        }
+
+        return songs.sort((a, b) => a.timestamp - b.timestamp);
     },
 
     async incrementPlay(id) {
-        // Local play count tracker
+        let globalSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+        globalSongs = globalSongs.map(s => {
+            if (s.id === String(id)) s.plays = (s.plays || 0) + 1;
+            return s;
+        });
+        localStorage.setItem('sway_global_songs', JSON.stringify(globalSongs));
     },
 
     async deleteSong(id) {
         try {
             await deleteDoc(doc(db, "songs", String(id)));
         } catch (e) {}
+
+        let globalSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
+        globalSongs = globalSongs.filter(s => s.id !== String(id));
+        localStorage.setItem('sway_global_songs', JSON.stringify(globalSongs));
     },
 
     getPlaylists() {

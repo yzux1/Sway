@@ -9,36 +9,20 @@ window.Player = {
     init() {
         this.audio.preload = "auto";
         
-        // Setup main player & widget controllers
-        const handlePlayPause = () => this.togglePlayPause();
-        const handleNext = () => this.next();
-        const handlePrev = () => this.prev();
-
-        document.getElementById('btn-playpause').addEventListener('click', handlePlayPause);
-        document.getElementById('widget-btn-playpause').addEventListener('click', handlePlayPause);
-        
-        document.getElementById('btn-next').addEventListener('click', handleNext);
-        document.getElementById('widget-btn-next').addEventListener('click', handleNext);
-        
-        document.getElementById('btn-prev').addEventListener('click', handlePrev);
-        document.getElementById('widget-btn-prev').addEventListener('click', handlePrev);
+        document.getElementById('btn-playpause').addEventListener('click', () => this.togglePlayPause());
+        document.getElementById('btn-next').addEventListener('click', () => this.next());
+        document.getElementById('btn-prev').addEventListener('click', () => this.prev());
         
         const progressBar = document.getElementById('progress-bar');
-        const widgetProgressBar = document.getElementById('widget-progress-bar');
-
-        const seekAudio = (e) => {
+        progressBar.addEventListener('input', (e) => {
             if (this.audio.duration) {
                 this.audio.currentTime = (e.target.value / 100) * this.audio.duration;
             }
-        };
-        progressBar.addEventListener('input', seekAudio);
-        widgetProgressBar.addEventListener('input', seekAudio);
+        });
 
         this.audio.addEventListener('timeupdate', () => {
             if (this.audio.duration) {
-                const percent = (this.audio.currentTime / this.audio.duration) * 100;
-                progressBar.value = percent;
-                widgetProgressBar.value = percent;
+                progressBar.value = (this.audio.currentTime / this.audio.duration) * 100;
                 document.getElementById('current-time').innerText = this.formatTime(this.audio.currentTime);
             }
         });
@@ -52,31 +36,23 @@ window.Player = {
             }
         });
 
-        const toggleShuffle = () => {
+        document.getElementById('btn-shuffle').addEventListener('click', () => {
             this.isShuffle = !this.isShuffle;
             document.getElementById('btn-shuffle').classList.toggle('active', this.isShuffle);
-            document.getElementById('widget-btn-shuffle').classList.toggle('active', this.isShuffle);
-        };
-        document.getElementById('btn-shuffle').addEventListener('click', toggleShuffle);
-        document.getElementById('widget-btn-shuffle').addEventListener('click', toggleShuffle);
+        });
 
-        const toggleRepeat = () => {
+        document.getElementById('btn-repeat').addEventListener('click', () => {
             this.isRepeat = !this.isRepeat;
             document.getElementById('btn-repeat').classList.toggle('active', this.isRepeat);
-            document.getElementById('widget-btn-repeat').classList.toggle('active', this.isRepeat);
-        };
-        document.getElementById('btn-repeat').addEventListener('click', toggleRepeat);
-        document.getElementById('widget-btn-repeat').addEventListener('click', toggleRepeat);
+        });
         
-        const toggleLikeCurrent = () => {
+        document.getElementById('btn-player-like').addEventListener('click', () => {
             const currentSong = this.queue[this.currentIndex];
             if (currentSong) {
                 window.Storage.toggleLike(currentSong.id);
                 this.updatePlayerLikeIcon();
             }
-        };
-        document.getElementById('btn-player-like').addEventListener('click', toggleLikeCurrent);
-        document.getElementById('widget-btn-like').addEventListener('click', toggleLikeCurrent);
+        });
 
         // Setup Media Session API for Background Playback & Notification Controls with Focus Handling
         if ('mediaSession' in navigator) {
@@ -113,10 +89,6 @@ window.Player = {
         document.getElementById('player-title').innerText = song.title;
         document.getElementById('player-artist').innerText = song.artist;
         document.getElementById('player-art').src = song.artBase64 || '';
-        
-        document.getElementById('widget-title').innerText = song.title;
-        document.getElementById('widget-artist').innerText = song.artist;
-        document.getElementById('widget-art').src = song.artBase64 || '';
         document.getElementById('duration').innerText = '-:-';
         
         this.audio.onloadedmetadata = () => {
@@ -170,21 +142,20 @@ window.Player = {
     },
 
     updatePlayPauseIcon() {
-        const iconHTML = `<svg class="icon"><use href="${this.isPlaying ? '#icon-pause' : '#icon-play'}"></use></svg>`;
-        document.getElementById('btn-playpause').innerHTML = iconHTML;
-        document.getElementById('widget-btn-playpause').innerHTML = iconHTML;
+        const btn = document.getElementById('btn-playpause');
+        btn.innerHTML = `<svg class="icon"><use href="${this.isPlaying ? '#icon-pause' : '#icon-play'}"></use></svg>`;
     },
 
     updatePlayerLikeIcon() {
         const currentSong = this.queue[this.currentIndex];
+        const btn = document.getElementById('btn-player-like');
         if (!currentSong) return;
         const isLiked = window.Storage.isLiked(currentSong.id);
-        const iconHTML = `<svg class="icon"><use href="${isLiked ? '#icon-heart-filled' : '#icon-heart-outline'}"></use></svg>`;
-        document.getElementById('btn-player-like').innerHTML = iconHTML;
-        document.getElementById('widget-btn-like').innerHTML = iconHTML;
+        btn.innerHTML = `<svg class="icon"><use href="${isLiked ? '#icon-heart-filled' : '#icon-heart-outline'}"></use></svg>`;
     },
 
     formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;

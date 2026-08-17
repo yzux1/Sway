@@ -66,19 +66,6 @@
         <h1 class="splash-title">Sway</h1>
     </div>
 
-    <!-- Auth Overlay -->
-    <div id="auth-overlay" class="auth-overlay hidden">
-        <div class="auth-box">
-            <h1 class="brand-title center mb-4">Sway</h1>
-            <p class="sub-text center mb-4">Sync your music profile across the cloud.</p>
-            <input type="text" id="auth-username" placeholder="Username" class="input-line mb-4">
-            <input type="password" id="auth-password" placeholder="Password" class="input-line mb-4">
-            <input type="password" id="auth-password-confirm" placeholder="Confirm Password (Register only)" class="input-line mb-4 hidden">
-            <button id="btn-auth-submit" class="btn-primary mb-4">Login</button>
-            <p id="auth-toggle-mode" class="sub-text center click-text">Don't have an account? Register</p>
-        </div>
-    </div>
-
     <div id="app-container">
         
         <main id="page-home" class="page active">
@@ -107,17 +94,6 @@
             <div id="search-results" class="song-list mt-4"></div>
         </main>
 
-        <main id="page-party" class="page">
-            <header class="page-header"><h1 class="brand-title">Party Mode</h1></header>
-            <div class="minimal-border mb-4">
-                <p class="sub-text mb-4">Jam together with friends in real-time.</p>
-                <input type="text" id="party-friend-input" placeholder="Friend's Username" class="input-line mb-4">
-                <button id="btn-send-invite" class="btn-primary">Send Party Invite</button>
-            </div>
-            <h3 class="mb-4">Party Queue</h3>
-            <div id="party-queue-list" class="song-list"></div>
-        </main>
-
         <main id="page-playlists" class="page">
             <header class="header-flex page-header">
                 <h1 class="brand-title">Library</h1>
@@ -139,7 +115,6 @@
                     <div style="display:flex; gap: 8px;">
                         <button id="btn-pl-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
                         <button id="btn-pl-repeat" class="icon-btn state-btn"><svg class="icon"><use href="#icon-repeat"></use></svg></button>
-                        <button id="btn-pl-smart" class="icon-btn state-btn"><svg class="icon"><use href="#icon-sparkle"></use></svg></button>
                     </div>
                 </div>
                 <button id="btn-add-to-playlist" class="btn-minimal block mb-4">Add Songs</button>
@@ -160,11 +135,7 @@
         <main id="page-settings" class="page">
             <header class="page-header"><h1 class="brand-title">Settings</h1></header>
             <div class="settings-content">
-                <div class="info-card minimal-border mb-4">
-                    <p><strong>Logged in as:</strong> <span id="settings-username" style="color:#fff;">-</span></p>
-                    <button id="btn-logout" class="btn-minimal mt-4" style="border-color:#ff453a; color:#ff453a;">Log Out / Switch Account</button>
-                </div>
-                <div id="btn-dev-access" class="dev-card minimal-border">Developer Login</div>
+                <div id="btn-dev-access" class="dev-card minimal-border click-text center">Developer Login</div>
             </div>
         </main>
 
@@ -191,7 +162,6 @@
         <nav id="bottom-nav">
             <button class="nav-btn active" data-target="page-home">Home</button>
             <button class="nav-btn" data-target="page-search">Search</button>
-            <button class="nav-btn" data-target="page-party">Party</button>
             <button class="nav-btn" data-target="page-playlists">Library</button>
             <button class="nav-btn" data-target="page-settings">Settings</button>
             <button class="nav-btn hidden" id="nav-editor" data-target="page-editor">Editor</button>
@@ -234,7 +204,6 @@
                     <button id="sheet-btn-like" class="sheet-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg> <span>Like Song</span></button>
                     <button id="sheet-btn-artist" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>View Artist Profile</span></button>
                     <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-play"></use></svg> <span>Add to Playlist</span></button>
-                    <button id="sheet-btn-party" class="sheet-btn"><svg class="icon"><use href="#icon-sparkle"></use></svg> <span>Add to Party Queue</span></button>
                     <button id="sheet-btn-share" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>Copy Song Info</span></button>
                     <button id="sheet-btn-delete" class="sheet-btn hidden delete-red"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Database</span></button>
                 </div>

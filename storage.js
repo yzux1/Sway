@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, increment, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgDktoAQtDrWue-uLrtWhBUodEtTOKGfQ",
@@ -21,31 +21,45 @@ window.Storage = {
         return JSON.parse(localStorage.getItem('sway_current_user') || 'null');
     },
     async registerUser(username, password) {
-        const userRef = doc(db, "users", username.toLowerCase().trim());
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) throw new Error("Username already taken!");
+        const cleanUser = username.toLowerCase().trim();
+        const userRef = doc(db, "users", cleanUser);
+        
+        try {
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) throw new Error("Username already taken!");
 
-        const userData = {
-            username: username.trim(),
-            password: password,
-            playlists: [],
-            likedSongs: [],
-            history: [],
-            createdAt: Date.now()
-        };
-        await setDoc(userRef, userData);
-        localStorage.setItem('sway_current_user', JSON.stringify(userData));
-        return userData;
+            const userData = {
+                username: username.trim(),
+                password: password,
+                playlists: [],
+                likedSongs: [],
+                history: [],
+                createdAt: Date.now()
+            };
+            await setDoc(userRef, userData);
+            localStorage.setItem('sway_current_user', JSON.stringify(userData));
+            return userData;
+        } catch (err) {
+            console.error("Firebase Error:", err);
+            throw new Error(err.message || "Connection failed. Check internet.");
+        }
     },
     async loginUser(username, password) {
-        const userRef = doc(db, "users", username.toLowerCase().trim());
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) throw new Error("User not found!");
-        const data = userSnap.data();
-        if (data.password !== password) throw new Error("Incorrect password!");
+        const cleanUser = username.toLowerCase().trim();
+        const userRef = doc(db, "users", cleanUser);
+        
+        try {
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) throw new Error("User not found!");
+            const data = userSnap.data();
+            if (data.password !== password) throw new Error("Incorrect password!");
 
-        localStorage.setItem('sway_current_user', JSON.stringify(data));
-        return data;
+            localStorage.setItem('sway_current_user', JSON.stringify(data));
+            return data;
+        } catch (err) {
+            console.error("Firebase Error:", err);
+            throw new Error(err.message || "Connection failed. Check internet.");
+        }
     },
     async syncUserData(field, data) {
         const user = this.getCurrentUser();
@@ -53,8 +67,10 @@ window.Storage = {
         user[field] = data;
         localStorage.setItem('sway_current_user', JSON.stringify(user));
         
-        const userRef = doc(db, "users", user.username.toLowerCase().trim());
-        await updateDoc(userRef, { [field]: data });
+        try {
+            const userRef = doc(db, "users", user.username.toLowerCase().trim());
+            await updateDoc(userRef, { [field]: data });
+        } catch(e) { console.error("Sync error", e); }
     },
     async saveSong(song) {
         const audioFormData = new FormData();
@@ -116,9 +132,11 @@ window.Storage = {
         await setDoc(doc(db, "parties", toUser.toLowerCase().trim()), { from: fromUser, status: 'pending', timestamp: Date.now() });
     },
     async checkPartyInvites(username) {
-        const ref = doc(db, "parties", username.toLowerCase().trim());
-        const snap = await getDoc(ref);
-        if(snap.exists()) return snap.data();
+        try {
+            const ref = doc(db, "parties", username.toLowerCase().trim());
+            const snap = await getDoc(ref);
+            if(snap.exists()) return snap.data();
+        } catch(e){}
         return null;
     },
     async clearPartyInvite(username) {

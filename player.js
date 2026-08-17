@@ -53,6 +53,14 @@ window.Player = {
                 this.updatePlayerLikeIcon();
             }
         });
+
+        // Setup Media Session API for Lock Screen & Notification Bar Controls
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => { if (!this.isPlaying) this.togglePlayPause(); });
+            navigator.mediaSession.setActionHandler('pause', () => { if (this.isPlaying) this.togglePlayPause(); });
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+        }
     },
 
     playSong(index, queue) {
@@ -80,6 +88,18 @@ window.Player = {
         this.updatePlayPauseIcon();
         this.updatePlayerLikeIcon();
         window.Storage.incrementPlay(song.id);
+
+        // Update Notification Bar / Lock Screen Metadata
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title,
+                artist: song.artist,
+                album: 'Sway Music',
+                artwork: [
+                    { src: song.artBase64 || 'https://via.placeholder.com/512', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+        }
     },
 
     togglePlayPause() {
@@ -88,7 +108,7 @@ window.Player = {
             this.audio.pause();
             this.isPlaying = false;
         } else {
-            this.audio.play();
+            this.audio.play().catch(e => {});
             this.isPlaying = true;
         }
         this.updatePlayPauseIcon();

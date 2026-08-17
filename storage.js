@@ -88,7 +88,6 @@ window.Storage = {
         user[field] = data;
         localStorage.setItem('sway_current_user', JSON.stringify(user));
         
-        // Also save in user-isolated local key to prevent data loss on refresh
         localStorage.setItem(`sway_user_${user.username.toLowerCase()}_${field}`, JSON.stringify(data));
 
         try {
@@ -121,7 +120,6 @@ window.Storage = {
 
         await setDoc(doc(db, "songs", songData.id), songData);
         
-        // Cache locally instantly
         const localSongs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
         localSongs.push({ ...songData, artBase64: artUrl });
         localStorage.setItem('sway_cached_songs', JSON.stringify(localSongs));

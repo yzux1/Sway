@@ -1,17 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCgDktoAQtDrWue-uLrtWhBUodEtTOKGfQ",
-  authDomain: "sway-4e211.firebaseapp.com",
-  projectId: "sway-4e211",
-  storageBucket: "sway-4e211.firebasestorage.app",
-  messagingSenderId: "1019900913759",
-  appId: "1:1019900913759:web:55c82ca5844947a151d3ea"
-};
+const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqamZyd2F6aHl2d29rYXBoaHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NTExNjcsImV4cCI6MjEwMjUyNzE2N30";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
@@ -79,47 +71,57 @@ window.Storage = {
             genre: (song.genre || 'unknown').toLowerCase().trim(),
             vibe: (song.vibe || 'unknown').toLowerCase().trim(),
             plays: 0,
-            audioUrl: audioUrl,
-            artUrl: artUrl || song.artBase64,
+            audio_url: audioUrl,
+            art_url: artUrl || song.artBase64,
             timestamp: Date.now()
         };
 
-        // 1. Permanently save to local cache so it never disappears
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
-        localSongs.push({ ...songData, artBase64: songData.artUrl });
+        localSongs.push({ 
+            id: songData.id,
+            title: songData.title,
+            artist: songData.artist,
+            genre: songData.genre,
+            vibe: songData.vibe,
+            plays: songData.plays,
+            audioUrl: songData.audio_url,
+            artBase64: songData.art_url,
+            timestamp: songData.timestamp
+        });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        // 2. Try to save to Firebase cloud in the background
-        try {
-            await setDoc(doc(db, "songs", songData.id), songData);
-        } catch (err) {
-            console.warn("Cloud backup skipped, saved locally:", err);
+        const { error } = await supabase.from('songs').insert([songData]);
+        if (error) {
+            console.error("Supabase insert error:", error.message);
+            throw new Error("Cloud save failed: " + error.message);
         }
     },
 
     async getAllSongs() {
-        // Always load local songs first for instant, permanent display
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
 
-        // Try fetching updates from Firebase cloud safely without wiping local cache
         try {
-            const querySnapshot = await getDocs(collection(db, "songs"));
-            const cloudSongs = [];
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                cloudSongs.push({ ...data, artBase64: data.artUrl });
-            });
+            const { data, error } = await supabase.from('songs').select('*');
+            if (!error && data && data.length > 0) {
+                const cloudSongs = data.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    artist: item.artist,
+                    genre: item.genre,
+                    vibe: item.vibe,
+                    plays: item.plays,
+                    audioUrl: item.audio_url,
+                    artBase64: item.art_url,
+                    timestamp: Number(item.timestamp)
+                }));
 
-            // If cloud has items, merge them with local songs so nothing is ever lost
-            if (cloudSongs.length > 0) {
                 const map = new Map();
-                // Combine both lists, prioritizing unique IDs
                 [...localSongs, ...cloudSongs].forEach(s => map.set(s.id, s));
                 localSongs = Array.from(map.values());
                 localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
             }
         } catch (err) {
-            console.warn("Using permanent local storage cache:", err);
+            console.warn("Using local cache fallback:", err);
         }
 
         return localSongs.sort((a, b) => a.timestamp - b.timestamp);
@@ -136,7 +138,7 @@ window.Storage = {
 
     async deleteSong(id) {
         try {
-            await deleteDoc(doc(db, "songs", String(id)));
+            await supabase.from('songs').delete().match({ id: String(id) });
         } catch (e) {}
 
         let globalSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');

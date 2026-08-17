@@ -16,7 +16,6 @@ const db = getFirestore(app);
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
 
-// Helper function to upload with live byte tracking
 function uploadWithProgress(file, onProgress) {
     return new Promise((resolve, reject) => {
         const formData = new FormData();
@@ -41,15 +40,11 @@ function uploadWithProgress(file, onProgress) {
                 try {
                     const res = JSON.parse(xhr.responseText);
                     resolve(res.secure_url);
-                } catch (err) {
-                    reject(new Error("Failed to parse upload response"));
-                }
-            } else {
-                reject(new Error("Cloudinary upload failed with status " + xhr.status));
-            }
+                } catch (err) { reject(new Error("Parse error")); }
+            } else { reject(new Error("Upload failed")); }
         };
 
-        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.onerror = () => reject(new Error("Network error"));
         xhr.send(formData);
     });
 }
@@ -60,10 +55,6 @@ window.Storage = {
     },
     async registerUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
-        const userRef = doc(db, "users", cleanUser);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) throw new Error("Username already taken!");
-
         const userData = {
             username: username.trim(),
             password: password,
@@ -72,20 +63,33 @@ window.Storage = {
             history: [],
             createdAt: Date.now()
         };
-        await setDoc(userRef, userData);
+        try {
+            await setDoc(doc(db, "users", cleanUser), userData);
+        } catch(e) {}
         localStorage.setItem('sway_current_user', JSON.stringify(userData));
         return userData;
     },
     async loginUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
-        const userRef = doc(db, "users", cleanUser);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) throw new Error("User not found!");
-        const data = userSnap.data();
-        if (data.password !== password) throw new Error("Incorrect password!");
+        try {
+            const userSnap = await getDoc(doc(db, "users", cleanUser));
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                if (data.password !== password) throw new Error("Incorrect password!");
+                localStorage.setItem('sway_current_user', JSON.stringify(data));
+                return data;
+            }
+        } catch(e) {
+            if (e.message.includes("password")) throw e;
+        }
 
-        localStorage.setItem('sway_current_user', JSON.stringify(data));
-        return data;
+        // Fallback local check if offline
+        let localUser = JSON.parse(localStorage.getItem('sway_current_user') || 'null');
+        if (localUser && localUser.username.toLowerCase() === cleanUser) {
+            if (localUser.password !== password) throw new Error("Incorrect password!");
+            return localUser;
+        }
+        throw new Error("User not found or offline!");
     },
     async syncUserData(field, data) {
         const user = this.getCurrentUser();
@@ -94,18 +98,15 @@ window.Storage = {
         localStorage.setItem('sway_current_user', JSON.stringify(user));
         
         try {
-            const userRef = doc(db, "users", user.username.toLowerCase().trim());
-            await updateDoc(userRef, { [field]: data });
+            await updateDoc(doc(db, "users", user.username.toLowerCase().trim()), { [field]: data });
         } catch(e){}
     },
     async saveSong(song, onProgress) {
-        // Upload audio with live byte progress
         const audioUrl = await uploadWithProgress(song.audioFile, onProgress);
-        if (!audioUrl) throw new Error("Cloudinary Audio Upload Failed");
+        if (!audioUrl) throw new Error("Audio upload failed");
 
         let artUrl = '';
         if (song.artBase64) {
-            // Convert base64 cover image to blob/file for tracking if needed, or upload directly
             const res = await fetch(song.artBase64);
             const blob = await res.blob();
             artUrl = await uploadWithProgress(blob, null);
@@ -123,31 +124,52 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        await setDoc(doc(db, "songs", songData.id), songData);
+        // Save locally first so it's instantly cached
+        const localSongs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
+        localSongs.push({ ...songData, artBase64: artUrl });
+        localStorage.setItem('sway_cached_songs', JSON.stringify(localSongs));
+
+        // Save to cloud in background
+        try {
+            await setDoc(doc(db, "songs", songData.id), songData);
+        } catch(e){}
     },
     async getAllSongs() {
+        let songs = [];
         try {
             const querySnapshot = await getDocs(collection(db, "songs"));
-            const songs = [];
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 songs.push({ ...data, artBase64: data.artUrl });
             });
-            return songs.sort((a, b) => a.timestamp - b.timestamp);
-        } catch (err) { return []; }
+            if (songs.length > 0) {
+                // Update local cache with fresh cloud data
+                localStorage.setItem('sway_cached_songs', JSON.stringify(songs));
+            }
+        } catch (err) {}
+
+        // If cloud returned nothing, fall back to local cache so data never disappears
+        if (songs.length === 0) {
+            songs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
+        }
+
+        return songs.sort((a, b) => a.timestamp - b.timestamp);
     },
     async incrementPlay(id) {
         try { await updateDoc(doc(db, "songs", String(id)), { plays: increment(1) }); } catch(e){}
     },
-    async deleteSong(id) { await deleteDoc(doc(db, "songs", String(id))); },
-    
+    async deleteSong(id) { 
+        try { await deleteDoc(doc(db, "songs", String(id))); } catch(e){}
+        let localSongs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
+        localSongs = localSongs.filter(s => s.id !== String(id));
+        localStorage.setItem('sway_cached_songs', JSON.stringify(localSongs));
+    },
     async sendPartyInvite(toUser, fromUser) {
-        await setDoc(doc(db, "parties", toUser.toLowerCase().trim()), { from: fromUser, status: 'pending', timestamp: Date.now() });
+        try { await setDoc(doc(db, "parties", toUser.toLowerCase().trim()), { from: fromUser, status: 'pending', timestamp: Date.now() }); } catch(e){}
     },
     async checkPartyInvites(username) {
         try {
-            const ref = doc(db, "parties", username.toLowerCase().trim());
-            const snap = await getDoc(ref);
+            const snap = await getDoc(doc(db, "parties", username.toLowerCase().trim()));
             if(snap.exists()) return snap.data();
         } catch(e){}
         return null;

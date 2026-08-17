@@ -70,6 +70,29 @@
         
         <main id="page-home" class="page active">
             <header class="page-header"><h1 class="brand-title">Sway</h1></header>
+            
+            <!-- iOS / Android Style Home Widget Card -->
+            <div id="home-widget-card" class="home-widget-card mb-4">
+                <div class="widget-top">
+                    <img id="widget-art" src="" alt="Art">
+                    <div class="widget-info">
+                        <h4 id="widget-title">No song playing</h4>
+                        <p id="widget-artist" class="sub-text">Sway Music</p>
+                    </div>
+                    <button id="widget-btn-like" class="icon-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg></button>
+                </div>
+                <div class="widget-progress progress-container mt-4">
+                    <input type="range" id="widget-progress-bar" value="0" max="100">
+                </div>
+                <div class="widget-controls mt-4">
+                    <button id="widget-btn-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
+                    <button id="widget-btn-prev" class="icon-btn"><svg class="icon"><use href="#icon-prev"></use></svg></button>
+                    <button id="widget-btn-playpause" class="icon-btn play-circle"><svg class="icon"><use href="#icon-play"></use></svg></button>
+                    <button id="widget-btn-next" class="icon-btn"><svg class="icon"><use href="#icon-next"></use></svg></button>
+                    <button id="widget-btn-repeat" class="icon-btn state-btn active"><svg class="icon"><use href="#icon-repeat"></use></svg></button>
+                </div>
+            </div>
+
             <section class="content-section mb-4">
                 <button id="btn-open-genres" class="btn-minimal block center">Browse Genres & Vibes</button>
             </section>

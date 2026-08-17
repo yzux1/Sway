@@ -401,3 +401,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await renderSongs(); renderPlaylists();
 });
+

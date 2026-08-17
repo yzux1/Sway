@@ -1,14 +1,7 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false }
-});
-
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
+const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
 
 function uploadWithProgress(file, onProgress) {
     return new Promise((resolve, reject) => {
@@ -73,6 +66,7 @@ window.Storage = {
             timestamp: Date.now()
         };
 
+        // Save locally first
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
         localSongs.push({ 
             id: songData.id,
@@ -87,10 +81,26 @@ window.Storage = {
         });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        const { error } = await supabase.from('songs').insert(songData);
-        if (error) {
-            console.error("Supabase insert error:", error);
-            throw new Error(error.message || "Cloud save failed");
+        // Direct REST API Post to Supabase (bypasses SDK module errors)
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/songs`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(songData)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error("Cloud save failed: " + errText);
+            }
+        } catch (err) {
+            console.error("Cloud save error:", err);
+            throw err;
         }
     },
 
@@ -98,24 +108,34 @@ window.Storage = {
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
 
         try {
-            const { data, error } = await supabase.from('songs').select('*');
-            if (!error && data && data.length > 0) {
-                const cloudSongs = data.map(item => ({
-                    id: String(item.id),
-                    title: item.title,
-                    artist: item.artist,
-                    genre: item.genre,
-                    vibe: item.vibe,
-                    plays: item.plays,
-                    audioUrl: item.audio_url,
-                    artBase64: item.art_url,
-                    timestamp: Number(item.timestamp)
-                }));
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
 
-                const map = new Map();
-                [...localSongs, ...cloudSongs].forEach(s => map.set(s.id, s));
-                localSongs = Array.from(map.values());
-                localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    const cloudSongs = data.map(item => ({
+                        id: String(item.id),
+                        title: item.title,
+                        artist: item.artist,
+                        genre: item.genre,
+                        vibe: item.vibe,
+                        plays: item.plays,
+                        audioUrl: item.audio_url,
+                        artBase64: item.art_url,
+                        timestamp: Number(item.timestamp)
+                    }));
+
+                    const map = new Map();
+                    [...localSongs, ...cloudSongs].forEach(s => map.set(s.id, s));
+                    localSongs = Array.from(map.values());
+                    localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
+                }
             }
         } catch (err) {
             console.warn("Using local cache fallback");
@@ -135,7 +155,13 @@ window.Storage = {
 
     async deleteSong(id) {
         try {
-            await supabase.from('songs').delete().eq('id', String(id));
+            await fetch(`${SUPABASE_URL}/rest/v1/songs?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                }
+            });
         } catch (e) {}
 
         let globalSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');

@@ -1,7 +1,7 @@
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
 const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqamZyd2F6aHl2d29rYXBoaHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NTExNjcsImV4cCI6MjEwMjUyNzE2N30.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__MaIsE2fe-96smnuC8H6mQ_tLELUpzD";
 
 function uploadWithProgress(file, onProgress) {
     return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        // Save locally first
+        // Save locally first for instant display
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
         localSongs.push({ 
             id: songData.id,
@@ -81,14 +81,14 @@ window.Storage = {
         });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        // Direct REST API Post to Supabase (bypasses SDK module errors)
+        // Send to Supabase using the Publishable Key format
         try {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/songs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'apikey': SUPABASE_PUBLISHABLE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
                     'Prefer': 'return=minimal'
                 },
                 body: JSON.stringify(songData)
@@ -111,8 +111,8 @@ window.Storage = {
             const response = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
                 method: 'GET',
                 headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    'apikey': SUPABASE_PUBLISHABLE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
                 }
             });
 
@@ -158,8 +158,8 @@ window.Storage = {
             await fetch(`${SUPABASE_URL}/rest/v1/songs?id=eq.${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    'apikey': SUPABASE_PUBLISHABLE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
                 }
             });
         } catch (e) {}

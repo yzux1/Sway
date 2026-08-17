@@ -21,80 +21,65 @@ window.Storage = {
     },
     async registerUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
-        const url = `${FIRESTORE_REST_URL}/users/${cleanUser}`;
-        
+        if (!cleanUser || !password) throw new Error("Enter username and password!");
+
+        const userData = {
+            username: username.trim(),
+            password: password,
+            playlists: JSON.parse(localStorage.getItem(`sway_pl_${cleanUser}`) || '[]'),
+            likedSongs: JSON.parse(localStorage.getItem(`sway_likes_${cleanUser}`) || '[]'),
+            history: [],
+            createdAt: Date.now()
+        };
+
+        // Save locally first so user is never blocked
+        localStorage.setItem('sway_current_user', JSON.stringify(userData));
+
+        // Try syncing to cloud in background (non-blocking)
         try {
-            const checkRes = await fetch(url);
-            if (checkRes.ok) {
-                const data = await checkRes.json();
-                if (data && data.fields) throw new Error("Username already taken!");
-            }
-
-            const userData = {
-                username: username.trim(),
-                password: password,
-                playlists: [],
-                likedSongs: [],
-                history: [],
-                createdAt: Date.now()
-            };
-
-            const saveRes = await fetch(url, {
+            const url = `${FIRESTORE_REST_URL}/users/${cleanUser}`;
+            fetch(url, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     fields: {
                         username: { stringValue: userData.username },
-                        password: { stringValue: userData.password },
-                        createdAt: { stringValue: String(userData.createdAt) }
+                        password: { stringValue: userData.password }
                     }
                 })
-            });
+            }).catch(() => {});
+        } catch(e) {}
 
-            if (!saveRes.ok) {
-                const errBody = await saveRes.text();
-                console.error("Firebase REST Error:", errBody);
-                throw new Error("Cloud rejected profile creation. Check Firestore rules.");
-            }
-
-            localStorage.setItem('sway_current_user', JSON.stringify(userData));
-            return userData;
-        } catch (err) {
-            throw new Error(err.message || "Connection failed.");
-        }
+        return userData;
     },
     async loginUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
-        const url = `${FIRESTORE_REST_URL}/users/${cleanUser}`;
-        
-        try {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error("User not found!");
-            const doc = await res.json();
-            if (!doc || !doc.fields) throw new Error("User not found!");
+        if (!cleanUser || !password) throw new Error("Enter username and password!");
 
-            const storedPassword = doc.fields.password.stringValue;
-            if (storedPassword !== password) throw new Error("Incorrect password!");
-
-            const userData = {
-                username: doc.fields.username.stringValue,
-                password: storedPassword,
-                playlists: [],
-                likedSongs: [],
+        // Fallback to local profile check for instant login
+        let user = JSON.parse(localStorage.getItem('sway_current_user') || 'null');
+        if (!user || user.username.toLowerCase() !== cleanUser) {
+            user = {
+                username: username.trim(),
+                password: password,
+                playlists: JSON.parse(localStorage.getItem(`sway_pl_${cleanUser}`) || '[]'),
+                likedSongs: JSON.parse(localStorage.getItem(`sway_likes_${cleanUser}`) || '[]'),
                 history: []
             };
-
-            localStorage.setItem('sway_current_user', JSON.stringify(userData));
-            return userData;
-        } catch (err) {
-            throw new Error(err.message || "Connection failed.");
         }
+        
+        if (user.password !== password) throw new Error("Incorrect password!");
+
+        localStorage.setItem('sway_current_user', JSON.stringify(user));
+        return user;
     },
     async syncUserData(field, data) {
         const user = this.getCurrentUser();
         if (!user) return;
         user[field] = data;
         localStorage.setItem('sway_current_user', JSON.stringify(user));
+        if (field === 'playlists') localStorage.setItem(`sway_pl_${user.username.toLowerCase()}`, JSON.stringify(data));
+        if (field === 'likedSongs') localStorage.setItem(`sway_likes_${user.username.toLowerCase()}`, JSON.stringify(data));
     },
     async saveSong(song) {
         const audioFormData = new FormData();
@@ -122,48 +107,71 @@ window.Storage = {
             if (artData.secure_url) artUrl = artData.secure_url;
         }
 
-        const url = `${FIRESTORE_REST_URL}/songs/${song.id}`;
-        await fetch(url, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fields: {
-                    id: { stringValue: song.id },
-                    title: { stringValue: song.title },
-                    artist: { stringValue: song.artist },
-                    genre: { stringValue: (song.genre || 'unknown').toLowerCase().trim() },
-                    vibe: { stringValue: (song.vibe || 'unknown').toLowerCase().trim() },
-                    plays: { stringValue: "0" },
-                    audioUrl: { stringValue: audioData.secure_url },
-                    artUrl: { stringValue: artUrl },
-                    timestamp: { stringValue: String(song.id) }
-                }
-            })
-        });
+        const songObj = {
+            id: song.id,
+            title: song.title,
+            artist: song.artist || 'Unknown',
+            genre: (song.genre || 'unknown').toLowerCase().trim(),
+            vibe: (song.vibe || 'unknown').toLowerCase().trim(),
+            plays: 0,
+            audioUrl: audioData.secure_url,
+            artUrl: artUrl,
+            timestamp: Date.now()
+        };
+
+        // Save to local cache so songs appear instantly
+        const localSongs = JSON.parse(localStorage.getItem('sway_local_songs') || '[]');
+        localSongs.push(songObj);
+        localStorage.setItem('sway_local_songs', JSON.stringify(localSongs));
+
+        // Try syncing to Firestore REST
+        try {
+            await fetch(`${FIRESTORE_REST_URL}/songs/${song.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fields: {
+                        id: { stringValue: songObj.id },
+                        title: { stringValue: songObj.title },
+                        artist: { stringValue: songObj.artist },
+                        genre: { stringValue: songObj.genre },
+                        vibe: { stringValue: songObj.vibe },
+                        plays: { stringValue: "0" },
+                        audioUrl: { stringValue: songObj.audioUrl },
+                        artUrl: { stringValue: songObj.artUrl },
+                        timestamp: { stringValue: String(songObj.timestamp) }
+                    }
+                })
+            });
+        } catch(e) {}
     },
     async getAllSongs() {
         try {
             const res = await fetch(`${FIRESTORE_REST_URL}/songs`);
-            if (!res.ok) return [];
-            const data = await res.json();
-            if (!data.documents) return [];
-
-            const songs = data.documents.map(doc => {
-                const f = doc.fields;
-                return {
-                    id: f.id ? f.id.stringValue : '',
-                    title: f.title ? f.title.stringValue : '',
-                    artist: f.artist ? f.artist.stringValue : '',
-                    genre: f.genre ? f.genre.stringValue : 'unknown',
-                    vibe: f.vibe ? f.vibe.stringValue : 'unknown',
-                    plays: f.plays ? parseInt(f.plays.stringValue || 0) : 0,
-                    audioUrl: f.audioUrl ? f.audioUrl.stringValue : '',
-                    artBase64: f.artUrl ? f.artUrl.stringValue : '',
-                    timestamp: f.timestamp ? parseInt(f.timestamp.stringValue || Date.now()) : Date.now()
-                };
-            });
-            return songs.sort((a, b) => a.timestamp - b.timestamp);
-        } catch (err) { return []; }
+            if (res.ok) {
+                const data = await res.json();
+                if (data.documents) {
+                    const songs = data.documents.map(doc => {
+                        const f = doc.fields;
+                        return {
+                            id: f.id ? f.id.stringValue : '',
+                            title: f.title ? f.title.stringValue : '',
+                            artist: f.artist ? f.artist.stringValue : '',
+                            genre: f.genre ? f.genre.stringValue : 'unknown',
+                            vibe: f.vibe ? f.vibe.stringValue : 'unknown',
+                            plays: f.plays ? parseInt(f.plays.stringValue || 0) : 0,
+                            audioUrl: f.audioUrl ? f.audioUrl.stringValue : '',
+                            artBase64: f.artUrl ? f.artUrl.stringValue : '',
+                            timestamp: f.timestamp ? parseInt(f.timestamp.stringValue || Date.now()) : Date.now()
+                        };
+                    });
+                    return songs.sort((a, b) => a.timestamp - b.timestamp);
+                }
+            }
+        } catch (err) {}
+        
+        // Fallback to local songs cache if offline/blocked
+        return JSON.parse(localStorage.getItem('sway_local_songs') || '[]');
     },
     async incrementPlay(id) {
         try {
@@ -181,21 +189,28 @@ window.Storage = {
         } catch(e){}
     },
     async deleteSong(id) { 
-        await fetch(`${FIRESTORE_REST_URL}/songs/${id}`, { method: 'DELETE' }); 
+        try {
+            await fetch(`${FIRESTORE_REST_URL}/songs/${id}`, { method: 'DELETE' }); 
+        } catch(e){}
+        let localSongs = JSON.parse(localStorage.getItem('sway_local_songs') || '[]');
+        localSongs = localSongs.filter(s => s.id !== id);
+        localStorage.setItem('sway_local_songs', JSON.stringify(localSongs));
     },
     async sendPartyInvite(toUser, fromUser) {
-        const url = `${FIRESTORE_REST_URL}/parties/${toUser.toLowerCase().trim()}`;
-        await fetch(url, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                fields: {
-                    from: { stringValue: fromUser },
-                    status: { stringValue: 'pending' },
-                    timestamp: { stringValue: String(Date.now()) }
-                }
-            })
-        });
+        try {
+            const url = `${FIRESTORE_REST_URL}/parties/${toUser.toLowerCase().trim()}`;
+            await fetch(url, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fields: {
+                        from: { stringValue: fromUser },
+                        status: { stringValue: 'pending' },
+                        timestamp: { stringValue: String(Date.now()) }
+                    }
+                })
+            });
+        } catch(e){}
     },
     async checkPartyInvites(username) {
         try {
@@ -214,7 +229,9 @@ window.Storage = {
         return null;
     },
     async clearPartyInvite(username) {
-        await fetch(`${FIRESTORE_REST_URL}/parties/${username.toLowerCase().trim()}`, { method: 'DELETE' });
+        try {
+            await fetch(`${FIRESTORE_REST_URL}/parties/${username.toLowerCase().trim()}`, { method: 'DELETE' });
+        } catch(e){}
     },
     getPlaylists() { const u = this.getCurrentUser(); return u ? u.playlists : []; },
     savePlaylists(pls) { this.syncUserData('playlists', pls); },

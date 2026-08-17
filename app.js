@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let isRegisterMode = false;
 
+    // Check persistent developer access
+    if (localStorage.getItem('sway_dev_unlocked') === 'true') {
+        document.getElementById('nav-editor').classList.remove('hidden');
+    }
+
     const currentUser = window.Storage.getCurrentUser();
     if (!currentUser) {
         authOverlay.classList.remove('hidden');
@@ -373,7 +378,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('btn-dev-access').addEventListener('click', async () => {
         const code = await UI.show({ title: 'Developer Login', type: 'input', placeholder: 'Code' });
-        if (code === "1313dev") { document.getElementById('nav-editor').classList.remove('hidden'); UI.show({ title: 'Unlocked' }); }
+        if (code === "1313dev") { 
+            localStorage.setItem('sway_dev_unlocked', 'true');
+            document.getElementById('nav-editor').classList.remove('hidden'); 
+            UI.show({ title: 'Unlocked' }); 
+        }
     });
 
     await renderSongs(); renderPlaylists();

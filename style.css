@@ -1,5 +1,15 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: #000; color: #fff; overflow-x: hidden; }
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Inter', sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
+}
+body { 
+    background: #000; 
+    color: #fff; 
+    overflow-x: hidden; 
+}
 .hidden { display: none !important; }
 .center { text-align: center; }
 .block { display: block; width: 100%; }
@@ -8,13 +18,25 @@ body { background: #000; color: #fff; overflow-x: hidden; }
 
 /* Splash Screen Animation */
 .splash-screen {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background: #000; 
+    z-index: 10000; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
     animation: fadeOutSplash 0.5s ease 1.5s forwards;
 }
 .splash-title {
-    font-family: 'Outfit', sans-serif; font-size: 48px; font-weight: 700; color: #fff;
-    letter-spacing: -1px; animation: scaleInSplash 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    font-family: 'Outfit', sans-serif; 
+    font-size: 48px; 
+    font-weight: 700; 
+    color: #fff;
+    letter-spacing: -1px; 
+    animation: scaleInSplash 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes scaleInSplash {
     0% { transform: scale(0.7); opacity: 0; filter: blur(10px); }

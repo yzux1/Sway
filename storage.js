@@ -1,7 +1,7 @@
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
 const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqamZyd2F6aHl2d29rYXBoaHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NTExNjcsImV4cCI6MjEwMjUyNzE2N30.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
 
 function uploadWithProgress(file, onProgress) {
     return new Promise((resolve, reject) => {

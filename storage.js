@@ -16,6 +16,44 @@ const db = getFirestore(app);
 const CLOUD_NAME = "q3divsbj";
 const UPLOAD_PRESET = "sway_preset";
 
+// Helper function to upload with live byte tracking
+function uploadWithProgress(file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", UPLOAD_PRESET);
+        formData.append("resource_type", "auto");
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable && onProgress) {
+                const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+                const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+                const percent = Math.round((e.loaded / e.total) * 100);
+                onProgress({ loadedMB, totalMB, percent });
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    resolve(res.secure_url);
+                } catch (err) {
+                    reject(new Error("Failed to parse upload response"));
+                }
+            } else {
+                reject(new Error("Cloudinary upload failed with status " + xhr.status));
+            }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(formData);
+    });
+}
+
 window.Storage = {
     getCurrentUser() {
         return JSON.parse(localStorage.getItem('sway_current_user') || 'null');
@@ -60,32 +98,17 @@ window.Storage = {
             await updateDoc(userRef, { [field]: data });
         } catch(e){}
     },
-    async saveSong(song) {
-        const audioFormData = new FormData();
-        audioFormData.append("file", song.audioFile);
-        audioFormData.append("upload_preset", UPLOAD_PRESET);
-        audioFormData.append("resource_type", "auto");
-
-        const audioRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
-            method: "POST",
-            body: audioFormData
-        });
-        const audioData = await audioRes.json();
-        if (!audioData.secure_url) throw new Error("Cloudinary Audio Upload Failed");
-        const audioUrl = audioData.secure_url;
+    async saveSong(song, onProgress) {
+        // Upload audio with live byte progress
+        const audioUrl = await uploadWithProgress(song.audioFile, onProgress);
+        if (!audioUrl) throw new Error("Cloudinary Audio Upload Failed");
 
         let artUrl = '';
         if (song.artBase64) {
-            const artFormData = new FormData();
-            artFormData.append("file", song.artBase64);
-            artFormData.append("upload_preset", UPLOAD_PRESET);
-
-            const artRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
-                method: "POST",
-                body: artFormData
-            });
-            const artData = await artRes.json();
-            if (artData.secure_url) artUrl = artData.secure_url;
+            // Convert base64 cover image to blob/file for tracking if needed, or upload directly
+            const res = await fetch(song.artBase64);
+            const blob = await res.blob();
+            artUrl = await uploadWithProgress(blob, null);
         }
 
         const songData = {

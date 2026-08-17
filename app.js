@@ -1,88 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
-    const authOverlay = document.getElementById('auth-overlay');
-    const authUsernameInput = document.getElementById('auth-username');
-    const authPasswordInput = document.getElementById('auth-password');
-    const authConfirmInput = document.getElementById('auth-password-confirm');
-    const btnAuthSubmit = document.getElementById('btn-auth-submit');
-    const authToggleMode = document.getElementById('auth-toggle-mode');
-    
-    let isRegisterMode = false;
-
     if (localStorage.getItem('sway_dev_unlocked') === 'true') {
         document.getElementById('nav-editor').classList.remove('hidden');
     }
-
-    const currentUser = window.Storage.getCurrentUser();
-    if (!currentUser) {
-        authOverlay.classList.remove('hidden');
-    } else {
-        document.getElementById('settings-username').innerText = currentUser.username;
-    }
-
-    authToggleMode.addEventListener('click', () => {
-        isRegisterMode = !isRegisterMode;
-        if (isRegisterMode) {
-            authConfirmInput.classList.remove('hidden');
-            btnAuthSubmit.innerText = "Register Profile";
-            authToggleMode.innerText = "Already have an account? Login";
-        } else {
-            authConfirmInput.classList.add('hidden');
-            btnAuthSubmit.innerText = "Login";
-            authToggleMode.innerText = "Don't have an account? Register";
-        }
-    });
-
-    btnAuthSubmit.addEventListener('click', async () => {
-        const u = authUsernameInput.value;
-        const p = authPasswordInput.value;
-        if(!u || !p) return alert("Fill in username and password!");
-
-        try {
-            if (isRegisterMode) {
-                const cp = authConfirmInput.value;
-                if(p !== cp) return alert("Passwords do not match!");
-                await window.Storage.registerUser(u, p);
-            } else {
-                await window.Storage.loginUser(u, p);
-            }
-            authOverlay.classList.add('hidden');
-            document.getElementById('settings-username').innerText = u;
-            location.reload();
-        } catch(err) {
-            alert(err.message);
-        }
-    });
-
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        localStorage.removeItem('sway_current_user');
-        location.reload();
-    });
-
-    const activeUser = window.Storage.getCurrentUser();
-    if (activeUser) {
-        setInterval(async () => {
-            const invite = await window.Storage.checkPartyInvites(activeUser.username);
-            if (invite && invite.status === 'pending') {
-                const accept = confirm(`${invite.from} invited you to a Party Session! Accept?`);
-                if (accept) {
-                    alert("Joined Party Session!");
-                    await window.Storage.clearPartyInvite(activeUser.username);
-                } else {
-                    await window.Storage.clearPartyInvite(activeUser.username);
-                }
-            }
-        }, 5000);
-    }
-
-    document.getElementById('btn-send-invite').addEventListener('click', async () => {
-        const friendName = document.getElementById('party-friend-input').value;
-        if (!friendName) return alert("Enter a username!");
-        const me = window.Storage.getCurrentUser().username;
-        await window.Storage.sendPartyInvite(friendName, me);
-        alert(`Party invitation sent to ${friendName}!`);
-        document.getElementById('party-friend-input').value = '';
-    });
 
     const UI = {
         modal: document.getElementById('custom-modal'), title: document.getElementById('modal-title'), desc: document.getElementById('modal-desc'),
@@ -165,8 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         homeList.innerHTML = ''; editorList.innerHTML = '';
         
         if(allLoadedSongs.length === 0) {
-            homeList.innerHTML = '<p class="sub-text center mt-4">No songs in cloud.</p>';
-            editorList.innerHTML = '<p class="sub-text center mt-4">No songs in cloud.</p>';
+            homeList.innerHTML = '<p class="sub-text center mt-4">No songs available.</p>';
+            editorList.innerHTML = '<p class="sub-text center mt-4">No songs available.</p>';
             return;
         }
 
@@ -254,16 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.ActionSheet.close(); openProfile('artist', artist);
     });
 
-    document.getElementById('sheet-btn-party').addEventListener('click', () => {
-        const song = window.ActionSheet.currentSong;
-        window.ActionSheet.close();
-        const partyList = document.getElementById('party-queue-list');
-        const card = document.createElement('div'); card.className = 'song-card';
-        card.innerHTML = `<img src="${song.artBase64}"><div class="song-info"><h4>${song.title}</h4><p class="sub-text">${song.artist}</p></div>`;
-        partyList.appendChild(card);
-        alert("Added song to Party Queue!");
-    });
-
     document.getElementById('sheet-btn-share').addEventListener('click', () => {
         const s = window.ActionSheet.currentSong;
         navigator.clipboard.writeText(`${s.title} by ${s.artist} on Sway`);
@@ -285,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     document.getElementById('sheet-btn-delete').addEventListener('click', async () => {
         window.ActionSheet.close();
-        if(await UI.show({ title: 'Delete Song?', desc: 'Remove from Cloud?' })) { await window.Storage.deleteSong(window.ActionSheet.currentSong.id); renderSongs(); }
+        if(await UI.show({ title: 'Delete Song?', desc: 'Remove song?' })) { await window.Storage.deleteSong(window.ActionSheet.currentSong.id); renderSongs(); }
     });
 
     const renderLikedCount = () => { document.getElementById('liked-count').innerText = `${window.Storage.getLikedSongs().length} songs`; };
@@ -379,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnSave.innerText = `Uploading: ${progress.loadedMB}MB / ${progress.totalMB}MB (${progress.percent}%)`;
             });
 
-            alert('Success! Song added to Cloud Database.');
+            alert('Success! Song added to global cloud database.');
             ['edit-audio', 'edit-art', 'edit-title', 'edit-artist', 'edit-genre', 'edit-vibe'].forEach(id => document.getElementById(id).value = '');
             renderSongs();
         } catch(err) {
@@ -401,4 +311,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await renderSongs(); renderPlaylists();
 });
-

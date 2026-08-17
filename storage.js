@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const SUPABASE_URL = "https://ajjfrwazhyvwokaphhsb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InEzZGl2c2JqIiwicm9sZSI6InEzZGl2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NTQwMDIsImV4cCI6MjA3MDIzMDAwMn0.Cs0IyuZaH63pGSvDstyux363UtD_khtXxT4QoLOLTMg";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -32,18 +32,13 @@ function uploadWithProgress(file, onProgress) {
                 try {
                     const res = JSON.parse(xhr.responseText);
                     resolve(res.secure_url);
-                } catch (err) { reject(new Error("Cloudinary JSON parse error")); }
+                } catch (err) { reject(new Error("Cloudinary parse error")); }
             } else { 
-                try {
-                    const errRes = JSON.parse(xhr.responseText);
-                    reject(new Error(errRes.error?.message || "Upload failed"));
-                } catch(e) {
-                    reject(new Error("Cloudinary upload failed with status " + xhr.status)); 
-                }
+                reject(new Error("Cloudinary upload failed")); 
             }
         };
 
-        xhr.onerror = () => reject(new Error("Network connection error during upload"));
+        xhr.onerror = () => reject(new Error("Network error"));
         xhr.send(formData);
     });
 }
@@ -76,6 +71,7 @@ window.Storage = {
             timestamp: Date.now()
         };
 
+        // Save locally first for instant UI response
         let localSongs = JSON.parse(localStorage.getItem('sway_global_songs') || '[]');
         localSongs.push({ 
             id: songData.id,
@@ -90,10 +86,11 @@ window.Storage = {
         });
         localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
 
-        const { error } = await supabase.from('songs').insert([songData]);
+        // Send to Supabase using standard upsert
+        const { error } = await supabase.from('songs').upsert([songData]);
         if (error) {
-            console.error("Supabase insert error:", error.message);
-            throw new Error("Cloud save failed: " + error.message);
+            console.error("Supabase error detail:", error);
+            throw new Error(error.message || "Cloud save failed");
         }
     },
 
@@ -104,7 +101,7 @@ window.Storage = {
             const { data, error } = await supabase.from('songs').select('*');
             if (!error && data && data.length > 0) {
                 const cloudSongs = data.map(item => ({
-                    id: item.id,
+                    id: String(item.id),
                     title: item.title,
                     artist: item.artist,
                     genre: item.genre,
@@ -121,7 +118,7 @@ window.Storage = {
                 localStorage.setItem('sway_global_songs', JSON.stringify(localSongs));
             }
         } catch (err) {
-            console.warn("Using local cache fallback:", err);
+            console.warn("Using local cache");
         }
 
         return localSongs.sort((a, b) => a.timestamp - b.timestamp);

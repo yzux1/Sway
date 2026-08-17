@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let isRegisterMode = false;
 
-    // Check persistent developer access
     if (localStorage.getItem('sway_dev_unlocked') === 'true') {
         document.getElementById('nav-editor').classList.remove('hidden');
     }
@@ -356,23 +355,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         const genre = document.getElementById('edit-genre').value;
         const vibe = document.getElementById('edit-vibe').value;
 
-        if (!audioFile || !title) return UI.show({ title: 'Error', desc: 'Audio and Title required.' });
+        if (!audioFile || !title) return alert('Audio and Title are required.');
 
-        let artBase64 = '';
-        if (artFile) {
-            const reader = new FileReader();
-            artBase64 = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(artFile); });
-        }
-
-        UI.show({ title: 'Uploading...', desc: 'Sending to Cloud. Please wait...', type: 'notice' });
+        const btnSave = document.getElementById('btn-save-song');
+        btnSave.innerText = "Uploading to Cloud (Please wait)...";
+        btnSave.disabled = true;
 
         try {
-            await window.Storage.saveSong({ id: Date.now().toString(), title, artist: artist || 'Unknown', genre: genre || 'unknown', vibe: vibe || 'unknown', audioFile, artBase64 });
-            UI.show({ title: 'Success', desc: 'Added to Cloud Database!' });
+            let artBase64 = '';
+            if (artFile) {
+                const reader = new FileReader();
+                artBase64 = await new Promise(res => { reader.onload = e => res(e.target.result); reader.readAsDataURL(artFile); });
+            }
+
+            await window.Storage.saveSong({ 
+                id: Date.now().toString(), 
+                title, 
+                artist: artist || 'Unknown', 
+                genre: genre || 'unknown', 
+                vibe: vibe || 'unknown', 
+                audioFile, 
+                artBase64 
+            });
+
+            alert('Success! Song added to Cloud Database.');
             ['edit-audio', 'edit-art', 'edit-title', 'edit-artist', 'edit-genre', 'edit-vibe'].forEach(id => document.getElementById(id).value = '');
             renderSongs();
         } catch(err) {
-            UI.show({ title: 'Upload Failed', desc: 'Check connection.' });
+            alert('Upload Failed: ' + err.message);
+        } finally {
+            btnSave.innerText = "Add Song";
+            btnSave.disabled = false;
         }
     });
 

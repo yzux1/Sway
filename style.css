@@ -46,12 +46,6 @@ body {
     to { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 
-.auth-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
-}
-.auth-box { width: 100%; max-width: 380px; background: #080808; border: 1px solid #1a1a1a; border-radius: 20px; padding: 30px; }
-
 #app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 140px; }
 .page { display: none; padding: 20px; opacity: 0; transition: opacity 0.2s ease; }
 .page.active { display: block; opacity: 1; }

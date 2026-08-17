@@ -55,6 +55,10 @@ window.Storage = {
     },
     async registerUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
+        const userRef = doc(db, "users", cleanUser);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) throw new Error("Username already taken!");
+
         const userData = {
             username: username.trim(),
             password: password,
@@ -63,33 +67,20 @@ window.Storage = {
             history: [],
             createdAt: Date.now()
         };
-        try {
-            await setDoc(doc(db, "users", cleanUser), userData);
-        } catch(e) {}
+        await setDoc(userRef, userData);
         localStorage.setItem('sway_current_user', JSON.stringify(userData));
         return userData;
     },
     async loginUser(username, password) {
         const cleanUser = username.toLowerCase().trim();
-        try {
-            const userSnap = await getDoc(doc(db, "users", cleanUser));
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                if (data.password !== password) throw new Error("Incorrect password!");
-                localStorage.setItem('sway_current_user', JSON.stringify(data));
-                return data;
-            }
-        } catch(e) {
-            if (e.message.includes("password")) throw e;
-        }
+        const userRef = doc(db, "users", cleanUser);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) throw new Error("User not found!");
+        const data = userSnap.data();
+        if (data.password !== password) throw new Error("Incorrect password!");
 
-        // Fallback local check if offline
-        let localUser = JSON.parse(localStorage.getItem('sway_current_user') || 'null');
-        if (localUser && localUser.username.toLowerCase() === cleanUser) {
-            if (localUser.password !== password) throw new Error("Incorrect password!");
-            return localUser;
-        }
-        throw new Error("User not found or offline!");
+        localStorage.setItem('sway_current_user', JSON.stringify(data));
+        return data;
     },
     async syncUserData(field, data) {
         const user = this.getCurrentUser();
@@ -97,8 +88,12 @@ window.Storage = {
         user[field] = data;
         localStorage.setItem('sway_current_user', JSON.stringify(user));
         
+        // Also save in user-isolated local key to prevent data loss on refresh
+        localStorage.setItem(`sway_user_${user.username.toLowerCase()}_${field}`, JSON.stringify(data));
+
         try {
-            await updateDoc(doc(db, "users", user.username.toLowerCase().trim()), { [field]: data });
+            const userRef = doc(db, "users", user.username.toLowerCase().trim());
+            await updateDoc(userRef, { [field]: data });
         } catch(e){}
     },
     async saveSong(song, onProgress) {
@@ -124,15 +119,12 @@ window.Storage = {
             timestamp: Date.now()
         };
 
-        // Save locally first so it's instantly cached
+        await setDoc(doc(db, "songs", songData.id), songData);
+        
+        // Cache locally instantly
         const localSongs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
         localSongs.push({ ...songData, artBase64: artUrl });
         localStorage.setItem('sway_cached_songs', JSON.stringify(localSongs));
-
-        // Save to cloud in background
-        try {
-            await setDoc(doc(db, "songs", songData.id), songData);
-        } catch(e){}
     },
     async getAllSongs() {
         let songs = [];
@@ -143,12 +135,10 @@ window.Storage = {
                 songs.push({ ...data, artBase64: data.artUrl });
             });
             if (songs.length > 0) {
-                // Update local cache with fresh cloud data
                 localStorage.setItem('sway_cached_songs', JSON.stringify(songs));
             }
         } catch (err) {}
 
-        // If cloud returned nothing, fall back to local cache so data never disappears
         if (songs.length === 0) {
             songs = JSON.parse(localStorage.getItem('sway_cached_songs') || '[]');
         }
@@ -178,9 +168,21 @@ window.Storage = {
         try { await deleteDoc(doc(db, "parties", username.toLowerCase().trim())); } catch(e){}
     },
 
-    getPlaylists() { const u = this.getCurrentUser(); return u ? u.playlists : []; },
+    getPlaylists() { 
+        const u = this.getCurrentUser(); 
+        if (!u) return [];
+        const isolated = localStorage.getItem(`sway_user_${u.username.toLowerCase()}_playlists`);
+        if (isolated) return JSON.parse(isolated);
+        return u.playlists || []; 
+    },
     savePlaylists(pls) { this.syncUserData('playlists', pls); },
-    getLikedSongs() { const u = this.getCurrentUser(); return u ? u.likedSongs : []; },
+    getLikedSongs() { 
+        const u = this.getCurrentUser(); 
+        if (!u) return [];
+        const isolated = localStorage.getItem(`sway_user_${u.username.toLowerCase()}_likedSongs`);
+        if (isolated) return JSON.parse(isolated);
+        return u.likedSongs || []; 
+    },
     toggleLike(songId) {
         let liked = this.getLikedSongs();
         if (liked.includes(songId)) liked = liked.filter(id => id !== songId);

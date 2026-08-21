@@ -6,7 +6,7 @@ class MusicPlayer {
         this.isPlaying = false;
         this.isShuffle = false;
         this.repeatMode = 'all'; // 'off', 'all', 'one'
-        this.smartPlayEnabled = true; // Enabled by default for endless smart shuffle
+        this.smartPlayEnabled = true; 
         this.allSongsDatabase = [];
 
         this.initElements();
@@ -17,14 +17,12 @@ class MusicPlayer {
         this.mainPlayer = document.getElementById('main-player');
         this.expandedPlayer = document.getElementById('expanded-player');
         
-        // Mini player elements
         this.playerArt = document.getElementById('player-art');
         this.playerTitle = document.getElementById('player-title');
         this.playerArtist = document.getElementById('player-artist');
         this.progressBar = document.getElementById('progress-bar');
         this.btnPlayerLike = document.getElementById('btn-player-like');
         
-        // Expanded player elements
         this.expandedArt = document.getElementById('expanded-art');
         this.expandedTitle = document.getElementById('expanded-title');
         this.expandedArtist = document.getElementById('expanded-artist');
@@ -71,6 +69,7 @@ class MusicPlayer {
 
         this.btnShuffle.addEventListener('click', () => {
             this.isShuffle = !this.isShuffle;
+            this.btnShuffle.style.opacity = this.isShuffle ? '1' : '0.4';
             this.btnShuffle.classList.toggle('active', this.isShuffle);
         });
 
@@ -99,7 +98,7 @@ class MusicPlayer {
         this.btnExpandedLike.addEventListener('click', toggleLikeAction);
     }
 
-    async setDatabase(songs) {
+    setDatabase(songs) {
         this.allSongsDatabase = songs;
     }
 
@@ -115,8 +114,7 @@ class MusicPlayer {
 
         if (!song) return;
 
-        // Smart Queue Extension if enabled and queue is small/ending
-        if (this.smartPlayEnabled && this.queue.length < 10) {
+        if (this.smartPlayEnabled && this.queue.length < 15) {
             this.appendSmartQueue(song);
         }
 
@@ -132,21 +130,18 @@ class MusicPlayer {
     appendSmartQueue(currentSong) {
         if (!this.allSongsDatabase || this.allSongsDatabase.length === 0) return;
         
-        // Find related songs by genre or vibe
         const related = this.allSongsDatabase.filter(s => 
             s.id !== currentSong.id && 
             !this.queue.some(q => q.id === s.id) &&
             (s.genre === currentSong.genre || s.vibe === currentSong.vibe)
         );
 
-        // Fallback to any remaining unqueued songs if genre/vibe match runs out
         const remaining = this.allSongsDatabase.filter(s => 
             s.id !== currentSong.id && 
             !this.queue.some(q => q.id === s.id)
         );
 
         const pool = [...related, ...remaining];
-        // Shuffle the pool to create smart endless discovery
         const shuffledPool = pool.sort(() => Math.random() - 0.5);
         this.queue.push(...shuffledPool.slice(0, 15));
     }
@@ -178,7 +173,7 @@ class MusicPlayer {
                 if (this.smartPlayEnabled) {
                     this.appendSmartQueue(this.queue[this.queue.length - 1]);
                 } else {
-                    this.currentIndex = 0; // loop back to start if series play
+                    this.currentIndex = 0;
                 }
             }
         }
@@ -195,6 +190,9 @@ class MusicPlayer {
         if (this.repeatMode === 'one') {
             this.audio.currentTime = 0;
             this.audio.play();
+        } else if (this.repeatMode === 'off' && this.currentIndex >= this.queue.length - 1 && !this.smartPlayEnabled) {
+            this.isPlaying = false;
+            this.updatePlayPauseIcon();
         } else {
             this.nextSong();
         }

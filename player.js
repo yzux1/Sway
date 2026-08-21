@@ -25,7 +25,7 @@ window.Player = {
             document.getElementById('expanded-player').classList.add('hidden');
         });
 
-        // Controls binding (both compact and expanded)
+        // Controls binding
         const togglePlay = () => this.togglePlayPause();
         const nextTrack = () => this.next();
         const prevTrack = () => this.prev();

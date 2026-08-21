@@ -9,7 +9,6 @@ window.Player = {
     init() {
         this.audio.preload = "auto";
         
-        // Compact Player Bar Click opens Expanded Player
         document.getElementById('main-player').addEventListener('click', (e) => {
             if(!e.target.closest('.icon-btn') && !e.target.closest('.artist-link')) {
                 this.expandPlayer();
@@ -25,7 +24,6 @@ window.Player = {
             document.getElementById('expanded-player').classList.add('hidden');
         });
 
-        // Controls binding
         const togglePlay = () => this.togglePlayPause();
         const nextTrack = () => this.next();
         const prevTrack = () => this.prev();
@@ -106,6 +104,8 @@ window.Player = {
 
         if (!song.audioUrl) return alert("Audio URL missing for this track.");
 
+        window.Storage.incrementPlay(song.id);
+
         this.audio.src = song.audioUrl;
         this.audio.play().then(() => {
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
@@ -173,7 +173,7 @@ window.Player = {
 
     updatePlayPauseIcon() {
         const btn = document.getElementById('expanded-btn-playpause');
-        btn.innerHTML = `<svg class="icon" style="width:28px;height:28px;"><use href="${this.isPlaying ? '#icon-pause' : '#icon-play'}"></use></svg>`;
+        btn.innerHTML = `<svg class="icon" style="width:30px;height:30px;"><use href="${this.isPlaying ? '#icon-pause' : '#icon-play'}"></use></svg>`;
     },
 
     updatePlayerLikeIcons() {

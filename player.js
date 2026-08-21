@@ -176,7 +176,7 @@ window.Player = {
         btn.innerHTML = `<svg class="icon" style="width:30px;height:30px;"><use href="${this.isPlaying ? '#icon-pause' : '#icon-play'}"></use></svg>`;
     },
 
-    updatePlayerLikeIcons(
+    updatePlayerLikeIcons() {
         const currentSong = this.queue[this.currentIndex];
         if (!currentSong) return;
         const isLiked = window.Storage.isLiked(currentSong.id);

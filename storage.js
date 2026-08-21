@@ -6,7 +6,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__MaIsE2fe-96smnuC8H6mQ_tLELUpzD
 
 function uploadWithProgress(file, onProgress) {
     return new Promise((resolve, reject) => {
-        if (!file) { reject(new Error("No file provided")); return; }
+        if (!file) { reject(new Error("Nle provided")); return; }
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", UPLOAD_PRESET);

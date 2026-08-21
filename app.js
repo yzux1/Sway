@@ -64,12 +64,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createSongCard = (song, queue, index, isEditor = false) => {
         const card = document.createElement('div'); card.className = 'song-card';
         card.innerHTML = `
-            <img src="${song.artBase64 || ''}" class="card-art">
+            <img src="${song.artBase64 || ''}">
             <div class="song-info">
                 <h4>${song.title}</h4>
                 <p class="sub-text click-text artist-link">${song.artist}</p>
             </div>
-            <button class="icon-btn btn-more" style="color:#8EB69B">
+            <button class="icon-btn btn-more" style="color:#4F772D">
                 <svg class="icon"><use href="#icon-more"></use></svg>
             </button>`;
         
@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filtered = allLoadedSongs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
             filtered.reverse().forEach((song, idx) => { 
                 const card = createSongCard(song, filtered, idx, true);
-                // Clicking a card in edit mode opens sub-editor panel instead of playing
                 card.addEventListener('click', (ev) => {
                     ev.stopImmediatePropagation();
                     if(!ev.target.closest('.btn-more') && !ev.target.closest('.artist-link')) {
@@ -174,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('sub-btn-delete').addEventListener('click', async () => {
         const id = document.getElementById('sub-edit-id').value;
-        if(confirm('Are you sure you want to delete this track from the cloud database?')) {
+        if(confirm('Are you sure you want to delete this track from the cloud?')) {
             await window.Storage.deleteSong(id);
             document.getElementById('sub-editor-panel').classList.add('hidden');
             renderSongs();
@@ -201,7 +200,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     document.getElementById('btn-back-profile').addEventListener('click', () => navigateTo('page-home'));
-    document.getElementById('player-artist').addEventListener('click', (e) => { openProfile('artist', e.target.innerText); });
+
+    // Global Artist link delegation handler for player & cards
+    document.addEventListener('click', (e) => {
+        if(e.target.classList.contains('artist-link')) {
+            e.stopPropagation();
+            openProfile('artist', e.target.innerText);
+        }
+    });
 
     document.getElementById('search-input').addEventListener('input', async (e) => {
         const q = e.target.value.toLowerCase();
@@ -265,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('playlist-list'); list.innerHTML = '';
         window.Storage.getPlaylists().forEach(pl => {
             const card = document.createElement('div'); card.className = 'song-card';
-            card.innerHTML = `<div class="icon-wrap" style="width:40px;height:40px;background:#163832;display:flex;align-items:center;justify-content:center;border-radius:8px;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-text">${pl.songIds.length} songs</p></div>`;
+            card.innerHTML = `<div class="icon-wrap" style="width:40px;height:40px;background:#C2E2CB;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#31572C;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-text">${pl.songIds.length} songs</p></div>`;
             card.addEventListener('click', () => openPlaylistView(pl.id)); list.appendChild(card);
         });
         renderLikedCount();
@@ -318,27 +324,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('playlist-view').classList.add('hidden'); renderPlaylists();
     });
 
-    // Multi-artist dynamic addition in editor
+    // Multi-artist dynamic fields
     document.getElementById('btn-add-artist-field').addEventListener('click', () => {
         const container = document.getElementById('artist-inputs-container');
-        const row = document.createElement('div');
-        row.className = 'artist-row';
-        row.style.cssText = "display:flex; gap:8px;";
-        row.innerHTML = `<input type="text" placeholder="Collaborating Artist" class="input-line artist-input" style="margin-bottom:0; flex:1;">`;
-        container.appendChild(row);
+        const input = document.createElement('input');
+        input.type = "text";
+        input.placeholder = "Collaborating Artist";
+        input.className = "input-cute artist-input";
+        input.style.marginTop = "6px";
+        container.appendChild(input);
     });
 
-    // Editor tab switching
+    // Editor tab toggling
     document.getElementById('btn-tab-add').addEventListener('click', () => {
-        document.getElementById('btn-tab-add').className = 'btn-primary small';
-        document.getElementById('btn-tab-edit').className = 'btn-minimal';
+        document.getElementById('btn-tab-add').className = 'btn-pill primary';
+        document.getElementById('btn-tab-edit').className = 'btn-pill';
         document.getElementById('editor-add-section').classList.remove('hidden');
         document.getElementById('editor-manage-section').classList.add('hidden');
         document.getElementById('sub-editor-panel').classList.add('hidden');
     });
     document.getElementById('btn-tab-edit').addEventListener('click', () => {
-        document.getElementById('btn-tab-edit').className = 'btn-primary small';
-        document.getElementById('btn-tab-add').className = 'btn-minimal';
+        document.getElementById('btn-tab-edit').className = 'btn-pill primary';
+        document.getElementById('btn-tab-add').className = 'btn-pill';
         document.getElementById('editor-manage-section').classList.remove('hidden');
         document.getElementById('editor-add-section').classList.add('hidden');
         renderSongs();
@@ -381,7 +388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnSave.innerText = `Uploading: ${progress.loadedMB}MB / ${progress.totalMB}MB (${progress.percent}%)`;
             });
 
-            alert('Track successfully published to cloud database.');
+            alert('Track successfully published.');
             ['edit-audio', 'edit-art', 'edit-title', 'edit-language', 'edit-genre', 'edit-vibe'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.value = '';
@@ -390,23 +397,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch(err) {
             alert('Upload Failed: ' + err.message);
         } finally {
-            btnSave.innerText = "Publish Track to Cloud";
+            btnSave.innerText = "Upload & Publish Track";
             btnSave.disabled = false;
         }
     });
 
     document.getElementById('btn-dev-access').addEventListener('click', async () => {
-        const code = await UI.show({ title: 'Developer Authentication', type: 'input', placeholder: 'Enter code' });
+        const code = await UI.show({ title: 'Studio Authentication', type: 'input', placeholder: 'Enter dev code' });
         if (code === "1313dev") { 
             localStorage.setItem('sway_dev_unlocked', 'true');
             document.getElementById('nav-editor').classList.remove('hidden'); 
-            UI.show({ title: 'Studio Access Granted' }); 
+            UI.show({ title: 'Studio Access Unlocked' }); 
         }
     });
 
-    // Settings actions
     document.getElementById('btn-clear-cache').addEventListener('click', () => {
-        if(confirm('Clear local song cache? Songs will be re-fetched from cloud.')) {
+        if(confirm('Clear local song cache?')) {
             localStorage.removeItem('sway_global_songs');
             alert('Cache cleared.');
             renderSongs();
@@ -416,7 +422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = { playlists: window.Storage.getPlaylists(), likes: window.Storage.getLikedSongs() };
         const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'sway-library-backup.json'; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = 'sway-backup.json'; a.click();
     });
 
     await renderSongs(); renderPlaylists();

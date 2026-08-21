@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 this.modal.classList.remove('hidden');
-                this.btnConfirm.onclick = () => { this.hide(); resolve(options.type === 'input' ? this.input.value : true); };
+                this.btnConfirm.onclick = () => { 
+                    this.hide(); 
+                    resolve(options.type === 'input' ? this.input.value : true); 
+                };
                 this.btnCancel.onclick = () => { this.hide(); resolve(null); };
             });
         },
@@ -47,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     UI.searchInput.addEventListener('input', (e) => {
         const q = e.target.value.toLowerCase();
         if(UI.requireTyping && q.trim() === '') { UI.list.innerHTML = '<p class="sub-text center mt-4">Type to search...</p>'; return; }
-        UI.renderList(this.allItems.filter(item => item.label.toLowerCase().includes(q)));
+        UI.renderList(UI.allItems.filter(item => item.label.toLowerCase().includes(q)));
     });
 
     const navButtons = document.querySelectorAll('.nav-btn[data-target]');
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h4>${song.title}</h4>
                 <p class="sub-text click-text artist-link">${song.artist}</p>
             </div>
-            <button class="icon-btn btn-more" style="color:#4F772D">
+            <button class="icon-btn btn-more" style="color:#2563EB">
                 <svg class="icon"><use href="#icon-more"></use></svg>
             </button>`;
         
@@ -201,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     document.getElementById('btn-back-profile').addEventListener('click', () => navigateTo('page-home'));
 
-    // Global Artist link delegation handler for player & cards
+    // Global Artist link delegation handler
     document.addEventListener('click', (e) => {
         if(e.target.classList.contains('artist-link')) {
             e.stopPropagation();
@@ -271,7 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('playlist-list'); list.innerHTML = '';
         window.Storage.getPlaylists().forEach(pl => {
             const card = document.createElement('div'); card.className = 'song-card';
-            card.innerHTML = `<div class="icon-wrap" style="width:40px;height:40px;background:#C2E2CB;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#31572C;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-text">${pl.songIds.length} songs</p></div>`;
+            card.innerHTML = `<div class="icon-wrap" style="width:40px;height:40px;background:#2563EB;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#FFFFFF;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-text">${pl.songIds.length} songs</p></div>`;
             card.addEventListener('click', () => openPlaylistView(pl.id)); list.appendChild(card);
         });
         renderLikedCount();
@@ -291,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = async () => {
                 const songIdToAdd = await UI.show({ 
-                    title: 'Add Track', type: 'list', 
+                    title: 'Add Track to Playlist', type: 'list', 
                     items: allSongs.map(s => ({ label: `${s.title} - ${s.artist}`, value: s.id })), 
                     placeholder: 'Type to search tracks...', requireTyping: true 
                 });
@@ -330,22 +333,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const input = document.createElement('input');
         input.type = "text";
         input.placeholder = "Collaborating Artist";
-        input.className = "input-cute artist-input";
+        input.className = "glass-input artist-input";
         input.style.marginTop = "6px";
         container.appendChild(input);
     });
 
     // Editor tab toggling
     document.getElementById('btn-tab-add').addEventListener('click', () => {
-        document.getElementById('btn-tab-add').className = 'btn-pill primary';
-        document.getElementById('btn-tab-edit').className = 'btn-pill';
+        document.getElementById('btn-tab-add').className = 'glass-btn primary';
+        document.getElementById('btn-tab-edit').className = 'glass-btn';
         document.getElementById('editor-add-section').classList.remove('hidden');
         document.getElementById('editor-manage-section').classList.add('hidden');
         document.getElementById('sub-editor-panel').classList.add('hidden');
     });
     document.getElementById('btn-tab-edit').addEventListener('click', () => {
-        document.getElementById('btn-tab-edit').className = 'btn-pill primary';
-        document.getElementById('btn-tab-add').className = 'btn-pill';
+        document.getElementById('btn-tab-edit').className = 'glass-btn primary';
+        document.getElementById('btn-tab-add').className = 'glass-btn';
         document.getElementById('editor-manage-section').classList.remove('hidden');
         document.getElementById('editor-add-section').classList.add('hidden');
         renderSongs();

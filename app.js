@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Link Smart Play setting toggle to Player instance
     const smartPlayToggle = document.getElementById('setting-smart-play');
     if(smartPlayToggle) {
         smartPlayToggle.addEventListener('change', (e) => {
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderSongs = async () => {
         allLoadedSongs = await window.Storage.getAllSongs();
         
-        // Pass songs database to Player for smart shuffle / endless queues
         if(window.Player && typeof window.Player.setDatabase === 'function') {
             window.Player.setDatabase(allLoadedSongs);
         }

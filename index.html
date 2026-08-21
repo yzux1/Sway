@@ -135,7 +135,13 @@
             <div id="playlist-list" class="song-list"></div>
             
             <div id="playlist-view" class="hidden">
-                <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
+                <div class="flex justify-between align-center mb-3">
+                    <button id="btn-back-playlists" class="icon-btn" style="width:auto; padding:0;"><svg class="icon"><use href="#icon-close"></use></svg></button>
+                    <div style="display:flex; gap:8px;">
+                        <button id="btn-rename-playlist" class="action-pill-btn small">Rename</button>
+                        <button id="btn-delete-playlist" class="action-pill-btn small" style="background:#FEE2E2; color:#DC2626; border-color:#FCA5A5;">Delete</button>
+                    </div>
+                </div>
                 <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
                 <div class="playlist-action-row mb-4 flex align-center" style="gap:10px; flex-wrap:wrap;">
                     <button id="btn-play-playlist" class="action-pill-btn primary">Play All</button>

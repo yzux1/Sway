@@ -33,7 +33,7 @@
         <symbol id="icon-heart-filled" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
         </symbol>
-        <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 6L6 18M6 6l12 12"/>
         </symbol>
         <symbol id="icon-more" viewBox="0 0 24 24" fill="currentColor">
@@ -115,7 +115,7 @@
         <main id="page-search" class="page">
             <header class="search-header mb-4">
                 <div class="search-container-box">
-                    <svg class="icon"><use href="#icon-search"></use></svg>
+                    <svg class="icon" style="width:20px;height:20px;min-width:20px;"><use href="#icon-search"></use></svg>
                     <input type="text" id="search-input" placeholder="Search tracks, artists, genres...">
                 </div>
             </header>
@@ -138,10 +138,10 @@
             <div id="playlist-view" class="hidden">
                 <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
                 <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
-                <div class="playlist-action-row mb-4">
+                <div class="playlist-action-row mb-4 flex align-center" style="gap:10px; flex-wrap:wrap;">
                     <button id="btn-play-playlist" class="action-pill-btn primary">Play All</button>
                     <button id="btn-add-to-playlist" class="action-pill-btn">Add Track</button>
-                    <div class="playback-toggles" style="display:flex; gap:6px;">
+                    <div class="playback-toggles" style="display:flex; gap:6px; margin-left:auto;">
                         <button id="btn-pl-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
                         <button id="btn-pl-repeat" class="icon-btn state-btn"><svg class="icon"><use href="#icon-repeat"></use></svg></button>
                     </div>
@@ -219,7 +219,7 @@
 
             <div id="editor-manage-section" class="hidden">
                 <div class="search-container-box mb-4">
-                    <svg class="icon"><use href="#icon-search"></use></svg>
+                    <svg class="icon" style="width:20px;height:20px;min-width:20px;"><use href="#icon-search"></use></svg>
                     <input type="text" id="editor-search-input" placeholder="Search database to edit or delete...">
                 </div>
                 <div id="editor-song-list" class="song-list"></div>
@@ -340,7 +340,7 @@
                 <p id="modal-desc" class="sub-caption hidden mb-3">Description</p>
                 <input type="text" id="modal-input" class="sand-input hidden mb-3" placeholder="...">
                 <div id="modal-search-wrapper" class="search-container-box hidden mb-3">
-                    <svg class="icon"><use href="#icon-search"></use></svg>
+                    <svg class="icon" style="width:20px;height:20px;min-width:20px;"><use href="#icon-search"></use></svg>
                     <input type="text" id="modal-search-input" placeholder="Search playlist or track...">
                 </div>
                 <div id="modal-list" class="song-list hidden" style="max-height: 240px; overflow-y: auto;"></div>

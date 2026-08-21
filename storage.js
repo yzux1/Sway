@@ -152,6 +152,24 @@ window.Storage = {
         setLocalSongs(localSongs);
     },
 
+    async incrementPlay(id) {
+        let localSongs = getLocalSongs();
+        let targetSong = localSongs.find(s => String(s.id) === String(id));
+        let newPlays = 1;
+        if (targetSong) {
+            newPlays = Number(targetSong.plays || 0) + 1;
+            targetSong.plays = newPlays;
+            setLocalSongs(localSongs);
+        }
+        try {
+            await supabaseRequest(`/rest/v1/songs?id=eq.${encodeURIComponent(id)}`, {
+                method: "PATCH",
+                headers: { "Prefer": "return=minimal" },
+                body: JSON.stringify({ plays: newPlays })
+            });
+        } catch (e) {}
+    },
+
     async getAllSongs() {
         let localSongs = getLocalSongs();
         try {

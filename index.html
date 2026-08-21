@@ -56,12 +56,25 @@
             <polyline points="7 23 3 19 7 15"></polyline>
             <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
         </symbol>
-        <symbol id="icon-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>
+        <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </symbol>
+        <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+        </symbol>
+        <symbol id="icon-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 m0-28a2 2 0 00-2.28-.45l-.06.06a1.65 1.65 0 01-1.82.33H9.21a1.65 1.65 0 01-1.82-.33l-.06-.06a2 2 0 00-2.28.45l-.06.06a1.65 1.65 0 00-.33 1.82V9.2a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 002.28.45l.06-.06a1.65 1.65 0 011.82-.33h3.58a1.65 1.65 0 011.82.33l.06.06a2 2 0 002.28-.45l.06-.06a1.65 1.65 0 00.33-1.82V7.4a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 00-2.28-.45z"></path>
         </symbol>
     </svg>
 
-    <!-- Animated Splash Screen -->
     <div id="splash-screen" class="splash-screen">
         <h1 class="splash-title">Sway</h1>
     </div>
@@ -69,11 +82,15 @@
     <div id="app-container">
         
         <main id="page-home" class="page active">
-            <header class="page-header"><h1 class="brand-title">Sway</h1></header>
+            <header class="page-header">
+                <h1 class="brand-title">Sway</h1>
+                <p class="sub-text">Lose yourself in music</p>
+            </header>
             <section class="content-section mb-4">
                 <button id="btn-open-genres" class="btn-minimal block center">Browse Genres & Vibes</button>
             </section>
             <section class="content-section">
+                <div class="section-title mb-4">Latest Tracks</div>
                 <div id="home-song-list" class="song-list"></div>
             </section>
         </main>
@@ -81,37 +98,37 @@
         <main id="page-genres" class="page">
             <button id="btn-back-genres" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
             <header class="page-header"><h1 class="brand-title">Discover</h1></header>
-            <div class="pill-container" id="genres-list"></div>
+            <div class="pill-container mt-4" id="genres-list"></div>
         </main>
 
         <main id="page-search" class="page">
-            <header class="search-header">
+            <header class="search-header mb-4">
                 <div class="search-bar-minimal">
                     <svg class="icon"><use href="#icon-search"></use></svg>
-                    <input type="text" id="search-input" placeholder="Search music...">
+                    <input type="text" id="search-input" placeholder="Search tracks, artists, vibes...">
                 </div>
             </header>
-            <div id="search-results" class="song-list mt-4"></div>
+            <div id="search-results" class="song-list"></div>
         </main>
 
         <main id="page-playlists" class="page">
-            <header class="header-flex page-header">
+            <header class="header-flex page-header mb-4">
                 <h1 class="brand-title">Library</h1>
-                <button id="btn-create-playlist" class="btn-minimal">New</button>
+                <button id="btn-create-playlist" class="btn-minimal">New Playlist</button>
             </header>
             
-            <div class="liked-songs-card" id="btn-open-liked">
-                <div class="icon-wrap"><svg class="icon"><use href="#icon-heart-filled"></use></svg></div>
-                <div class="song-info"><h4>Liked Songs</h4><p id="liked-count">0 songs</p></div>
+            <div class="liked-songs-card mb-4" id="btn-open-liked">
+                <div class="icon-wrap"><svg class="icon" style="width:24px;height:24px;"><use href="#icon-heart-filled"></use></svg></div>
+                <div class="song-info"><h4>Liked Songs</h4><p id="liked-count" class="sub-text">0 songs</p></div>
             </div>
 
-            <div id="playlist-list" class="song-list mt-4"></div>
+            <div id="playlist-list" class="song-list"></div>
             
             <div id="playlist-view" class="hidden">
                 <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
                 <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
                 <div class="playlist-controls header-flex mb-4">
-                    <button id="btn-play-playlist" class="btn-primary small">Play</button>
+                    <button id="btn-play-playlist" class="btn-primary small">Play All</button>
                     <div style="display:flex; gap: 8px;">
                         <button id="btn-pl-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
                         <button id="btn-pl-repeat" class="icon-btn state-btn"><svg class="icon"><use href="#icon-repeat"></use></svg></button>
@@ -133,38 +150,112 @@
         </main>
 
         <main id="page-settings" class="page">
-            <header class="page-header"><h1 class="brand-title">Settings</h1></header>
+            <header class="page-header mb-4"><h1 class="brand-title">Settings</h1></header>
             <div class="settings-content">
-                <div id="btn-dev-access" class="dev-card minimal-border click-text center">Developer Login</div>
+                <div class="settings-card minimal-border mb-4">
+                    <h4 class="mb-2" style="font-size:15px; font-weight:600;">Audio Quality</h4>
+                    <p class="sub-text mb-4">Stream and cache tracks in highest fidelity.</p>
+                    <div class="settings-row flex justify-between align-center">
+                        <span>High Fidelity Streaming</span>
+                        <input type="checkbox" id="setting-hq" checked style="accent-color: #8EB69B;">
+                    </div>
+                </div>
+                <div class="settings-card minimal-border mb-4">
+                    <h4 class="mb-2" style="font-size:15px; font-weight:600;">Data & Cache</h4>
+                    <p class="sub-text mb-4">Manage local storage cache and database sync state.</p>
+                    <button id="btn-clear-cache" class="btn-minimal block mb-2">Clear Local Cache</button>
+                    <button id="btn-export-data" class="btn-minimal block">Export Playlists JSON</button>
+                </div>
+                <div id="btn-dev-access" class="dev-card minimal-border click-text center" style="color: #8EB69B; font-weight: 600;">Developer Console</div>
             </div>
         </main>
 
         <main id="page-editor" class="page">
-            <header class="page-header"><h1 class="brand-title">Editor</h1></header>
-            <div class="editor-card minimal-border mb-4">
+            <header class="page-header mb-4"><h1 class="brand-title">Studio Editor</h1></header>
+            
+            <div class="editor-mode-switch mb-4" style="display:flex; gap:10px;">
+                <button id="btn-tab-add" class="btn-primary small" style="flex:1;">Add Track</button>
+                <button id="btn-tab-edit" class="btn-minimal" style="flex:1;">Manage / Edit</button>
+            </div>
+
+            <!-- ADD VIEW -->
+            <div id="editor-add-section" class="editor-card minimal-border mb-4">
+                <label class="sub-text block mb-2">Audio File (MP3 / WAV)</label>
                 <input type="file" id="edit-audio" accept="audio/*" class="input-line">
-                <label class="sub-text block mb-4">Upload MP3</label>
+                
+                <label class="sub-text block mb-2">Cover Artwork (Optional)</label>
                 <input type="file" id="edit-art" accept="image/*" class="input-line">
-                <label class="sub-text block mb-4">Upload Cover (Optional)</label>
-                <input type="text" id="edit-title" placeholder="Song Title" class="input-line">
-                <input type="text" id="edit-artist" placeholder="Artist Name" class="input-line">
-                <input type="text" id="edit-genre" placeholder="Genre (e.g. Hip Hop, 90s)" class="input-line">
-                <input type="text" id="edit-vibe" placeholder="Vibe (e.g. Punjabi, Phonk, Sad)" class="input-line">
-                <button id="btn-save-song" class="btn-primary mt-4">Add Song</button>
+                
+                <input type="text" id="edit-title" placeholder="Track Title" class="input-line">
+                
+                <!-- Multi-artist Container -->
+                <div class="multi-artist-wrap mb-3">
+                    <div id="artist-inputs-container" style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="artist-row" style="display:flex; gap:8px;">
+                            <input type="text" placeholder="Primary Artist Name" class="input-line artist-input" style="margin-bottom:0; flex:1;">
+                        </div>
+                    </div>
+                    <button type="button" id="btn-add-artist-field" class="btn-minimal small mt-2">+ Add Collaborator</button>
+                </div>
+
+                <input type="text" id="edit-language" placeholder="Language (e.g. English, Hindi, Punjabi)" class="input-line">
+                <input type="text" id="edit-genre" placeholder="Genre (e.g. Pop, Hip Hop, Lo-Fi)" class="input-line">
+                <input type="text" id="edit-vibe" placeholder="Vibe (e.g. Melancholic, Energetic, Chill)" class="input-line">
+                
+                <button id="btn-save-song" class="btn-primary mt-4">Publish Track to Cloud</button>
             </div>
-            <div class="search-bar-minimal mb-4">
-                <svg class="icon"><use href="#icon-search"></use></svg>
-                <input type="text" id="editor-search-input" placeholder="Search database to edit/delete...">
+
+            <!-- EDIT / DELETE VIEW -->
+            <div id="editor-manage-section" class="hidden">
+                <div class="search-bar-minimal mb-4">
+                    <svg class="icon"><use href="#icon-search"></use></svg>
+                    <input type="text" id="editor-search-input" placeholder="Search library database to edit or delete...">
+                </div>
+                <div id="editor-song-list" class="song-list"></div>
             </div>
-            <div id="editor-song-list" class="song-list"></div>
+
+            <!-- SINGLE SONG SUB-EDITOR MODAL/PANEL -->
+            <div id="sub-editor-panel" class="minimal-border hidden mb-4" style="background:#051F20; border-color:#235347;">
+                <h3 class="mb-4" style="font-family:'Outfit';">Edit Track Meta</h3>
+                <input type="hidden" id="sub-edit-id">
+                <label class="sub-text block mb-1">Title</label>
+                <input type="text" id="sub-edit-title" class="input-line">
+                <label class="sub-text block mb-1">Artists (comma separated)</label>
+                <input type="text" id="sub-edit-artist" class="input-line">
+                <label class="sub-text block mb-1">Language</label>
+                <input type="text" id="sub-edit-language" class="input-line">
+                <label class="sub-text block mb-1">Genre</label>
+                <input type="text" id="sub-edit-genre" class="input-line">
+                <label class="sub-text block mb-1">Vibe</label>
+                <input type="text" id="sub-edit-vibe" class="input-line">
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button id="sub-btn-update" class="btn-primary small" style="flex:1;">Save Changes</button>
+                    <button id="sub-btn-delete" class="btn-minimal" style="border-color:#8B0000; color:#ff6b6b; flex:1;">Delete Track</button>
+                </div>
+            </div>
         </main>
 
         <nav id="bottom-nav">
-            <button class="nav-btn active" data-target="page-home">Home</button>
-            <button class="nav-btn" data-target="page-search">Search</button>
-            <button class="nav-btn" data-target="page-playlists">Library</button>
-            <button class="nav-btn" data-target="page-settings">Settings</button>
-            <button class="nav-btn hidden" id="nav-editor" data-target="page-editor">Editor</button>
+            <button class="nav-btn active" data-target="page-home">
+                <svg class="icon" style="width:22px;height:22px;"><use href="#icon-home"></use></svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-btn" data-target="page-search">
+                <svg class="icon" style="width:22px;height:22px;"><use href="#icon-search"></use></svg>
+                <span>Search</span>
+            </button>
+            <button class="nav-btn" data-target="page-playlists">
+                <svg class="icon" style="width:22px;height:22px;"><use href="#icon-library"></use></svg>
+                <span>Library</span>
+            </button>
+            <button class="nav-btn" data-target="page-settings">
+                <svg class="icon" style="width:22px;height:22px;"><use href="#icon-settings"></use></svg>
+                <span>Settings</span>
+            </button>
+            <button class="nav-btn hidden" id="nav-editor" data-target="page-editor">
+                <svg class="icon" style="width:22px;height:22px;"><use href="#icon-plus"></use></svg>
+                <span>Studio</span>
+            </button>
         </nav>
 
         <div id="main-player" class="hidden">
@@ -172,10 +263,10 @@
             <div class="player-controls-wrap">
                 <div class="player-info-row">
                     <div class="player-text">
-                        <h4 id="player-title">No song</h4>
+                        <h4 id="player-title">No track selected</h4>
                         <p id="player-artist" class="sub-text click-text">Artist</p>
                     </div>
-                    <div style="display:flex; gap: 4px;">
+                    <div style="display:flex; gap: 6px;">
                         <button id="btn-player-like" class="icon-btn" style="padding: 4px;"><svg class="icon"><use href="#icon-heart-outline"></use></svg></button>
                         <button id="btn-player-more" class="icon-btn" style="padding: 4px;"><svg class="icon"><use href="#icon-more"></use></svg></button>
                     </div>
@@ -201,11 +292,11 @@
                     <div><h4 id="sheet-title">Title</h4><p id="sheet-artist" class="sub-text">Artist</p></div>
                 </div>
                 <div class="sheet-options">
-                    <button id="sheet-btn-like" class="sheet-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg> <span>Like Song</span></button>
+                    <button id="sheet-btn-like" class="sheet-btn"><svg class="icon"><use href="#icon-heart-outline"></use></svg> <span>Like Track</span></button>
                     <button id="sheet-btn-artist" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>View Artist Profile</span></button>
-                    <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-play"></use></svg> <span>Add to Playlist</span></button>
-                    <button id="sheet-btn-share" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>Copy Song Info</span></button>
-                    <button id="sheet-btn-delete" class="sheet-btn hidden delete-red"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Database</span></button>
+                    <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-plus"></use></svg> <span>Add to Playlist</span></button>
+                    <button id="sheet-btn-share" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>Copy Track Info</span></button>
+                    <button id="sheet-btn-delete" class="sheet-btn hidden delete-red"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Cloud</span></button>
                 </div>
                 <button id="sheet-btn-close" class="btn-minimal mt-4 block center">Cancel</button>
             </div>

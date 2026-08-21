@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Link Smart Play setting toggle to Player instance
+    const smartPlayToggle = document.getElementById('setting-smart-play');
+    if(smartPlayToggle) {
+        smartPlayToggle.addEventListener('change', (e) => {
+            if(window.Player) {
+                window.Player.smartPlayEnabled = e.target.checked;
+            }
+        });
+    }
+
     const UI = {
         modal: document.getElementById('custom-modal'), title: document.getElementById('modal-title'), desc: document.getElementById('modal-desc'),
         input: document.getElementById('modal-input'), searchWrapper: document.getElementById('modal-search-wrapper'), searchInput: document.getElementById('modal-search-input'),
@@ -108,6 +118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const renderSongs = async () => {
         allLoadedSongs = await window.Storage.getAllSongs();
+        
+        // Pass songs database to Player for smart shuffle / endless queues
+        if(window.Player && typeof window.Player.setDatabase === 'function') {
+            window.Player.setDatabase(allLoadedSongs);
+        }
+
         const homeList = document.getElementById('home-song-list');
         const trendingList = document.getElementById('trending-song-list');
         const editorList = document.getElementById('editor-song-list');
@@ -355,7 +371,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         targetSongs.forEach((song, idx) => viewList.appendChild(createSongCard(song, targetSongs, idx, false)));
     };
 
-    // Playlist Management Actions (Rename & Delete)
     const btnRename = document.getElementById('btn-rename-playlist');
     if(btnRename) {
         btnRename.onclick = async () => {

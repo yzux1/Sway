@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     let allLoadedSongs = [];
+    let activePlaylistId = null;
 
     const renderSongs = async () => {
         allLoadedSongs = await window.Storage.getAllSongs();
@@ -306,17 +307,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const openPlaylistView = async (id, asLiked = false) => {
+        activePlaylistId = asLiked ? null : id;
         const allSongs = await window.Storage.getAllSongs();
         let targetSongs = []; let title = "";
+
+        const btnRename = document.getElementById('btn-rename-playlist');
+        const btnDeletePl = document.getElementById('btn-delete-playlist');
 
         if (asLiked) {
             title = "Liked Songs"; targetSongs = allSongs.filter(s => window.Storage.getLikedSongs().includes(s.id));
             document.getElementById('btn-add-to-playlist').classList.add('hidden');
+            if(btnRename) btnRename.classList.add('hidden');
+            if(btnDeletePl) btnDeletePl.classList.add('hidden');
         } else {
-            const pl = window.Storage.getPlaylists().find(p => p.id === id);
+            const pls = window.Storage.getPlaylists();
+            const pl = pls.find(p => p.id === id);
+            if (!pl) return;
             title = pl.name; targetSongs = allSongs.filter(s => pl.songIds.includes(s.id));
             const btnAdd = document.getElementById('btn-add-to-playlist');
             btnAdd.classList.remove('hidden');
+            if(btnRename) btnRename.classList.remove('hidden');
+            if(btnDeletePl) btnDeletePl.classList.remove('hidden');
+
             btnAdd.onclick = async () => {
                 const songIdToAdd = await UI.show({ 
                     title: 'Select Track to Add', type: 'list', 
@@ -324,8 +336,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 if (songIdToAdd && !pl.songIds.includes(songIdToAdd)) {
                     pl.songIds.push(songIdToAdd);
-                    const pls = window.Storage.getPlaylists(); pls[pls.findIndex(p => p.id === id)] = pl;
-                    window.Storage.savePlaylists(pls); openPlaylistView(id); 
+                    const updatedPls = window.Storage.getPlaylists();
+                    const idx = updatedPls.findIndex(p => p.id === id);
+                    if(idx !== -1) {
+                        updatedPls[idx] = pl;
+                        window.Storage.savePlaylists(updatedPls);
+                        openPlaylistView(id); 
+                    }
                 }
             };
         }
@@ -338,6 +355,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         targetSongs.forEach((song, idx) => viewList.appendChild(createSongCard(song, targetSongs, idx, false)));
     };
 
+    // Playlist Management Actions (Rename & Delete)
+    const btnRename = document.getElementById('btn-rename-playlist');
+    if(btnRename) {
+        btnRename.onclick = async () => {
+            if(!activePlaylistId) return;
+            const newName = await UI.show({ title: 'Rename Playlist', type: 'input', placeholder: 'New playlist name...' });
+            if(newName && newName.trim() !== '') {
+                const pls = window.Storage.getPlaylists();
+                const idx = pls.findIndex(p => p.id === activePlaylistId);
+                if(idx !== -1) {
+                    pls[idx].name = newName.trim();
+                    window.Storage.savePlaylists(pls);
+                    document.getElementById('playlist-view-title').innerText = pls[idx].name;
+                    alert('Playlist renamed successfully.');
+                }
+            }
+        };
+    }
+
+    const btnDeletePl = document.getElementById('btn-delete-playlist');
+    if(btnDeletePl) {
+        btnDeletePl.onclick = async () => {
+            if(!activePlaylistId) return;
+            if(confirm('Are you sure you want to delete this playlist?')) {
+                let pls = window.Storage.getPlaylists();
+                pls = pls.filter(p => p.id !== activePlaylistId);
+                window.Storage.savePlaylists(pls);
+                document.getElementById('playlist-list').classList.remove('hidden'); 
+                document.querySelector('.liked-collection-card').classList.remove('hidden');
+                document.getElementById('playlist-view').classList.add('hidden');
+                activePlaylistId = null;
+                renderPlaylists();
+            }
+        };
+    }
+
     document.getElementById('btn-open-liked').addEventListener('click', () => openPlaylistView(null, true));
     document.getElementById('btn-create-playlist').addEventListener('click', async () => {
         const name = await UI.show({ title: 'New Playlist', type: 'input', placeholder: 'Playlist name...' });
@@ -348,7 +401,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     document.getElementById('btn-back-playlists').addEventListener('click', () => {
         document.getElementById('playlist-list').classList.remove('hidden'); document.querySelector('.liked-collection-card').classList.remove('hidden');
-        document.getElementById('playlist-view').classList.add('hidden'); renderPlaylists();
+        document.getElementById('playlist-view').classList.add('hidden'); activePlaylistId = null; renderPlaylists();
     });
 
     document.getElementById('btn-add-artist-field').addEventListener('click', () => {

@@ -54,7 +54,6 @@ window.Player = {
             }
         });
 
-        // Setup Media Session API for Background Playback & Notification Controls with Focus Handling
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => { 
                 window.focus();
@@ -74,7 +73,7 @@ window.Player = {
         this.currentIndex = index;
         const song = this.queue[this.currentIndex];
 
-        if (!song.audioUrl) return alert("Audio URL missing for this song!");
+        if (!song.audioUrl) return alert("Audio URL missing for this track.");
 
         this.audio.src = song.audioUrl;
         this.audio.play().then(() => {
@@ -104,7 +103,7 @@ window.Player = {
                 artist: song.artist,
                 album: 'Sway Music',
                 artwork: [
-                    { src: song.artBase64 || 'https://via.placeholder.com/512', sizes: '512x512', type: 'image/png' }
+                    { src: song.artBase64 || '', sizes: '512x512', type: 'image/png' }
                 ]
             });
         }

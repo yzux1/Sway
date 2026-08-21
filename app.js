@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nav-editor').classList.remove('hidden');
     }
 
-    // Secret Dev Trigger via tapping settings title 5 times
     let devTapCount = 0;
     const devTrigger = document.getElementById('settings-brand-trigger');
     if(devTrigger) {
@@ -123,7 +122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Trending algorithm (sorted by plays desc)
         const sortedByPlays = [...allLoadedSongs].sort((a, b) => (b.plays || 0) - (a.plays || 0));
         sortedByPlays.slice(0, 3).forEach((song, idx) => {
             if(trendingList) trendingList.appendChild(createSongCard(song, sortedByPlays, idx, false));

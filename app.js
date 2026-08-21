@@ -4,6 +4,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nav-editor').classList.remove('hidden');
     }
 
+    // Secret Dev Trigger via tapping settings title 5 times
+    let devTapCount = 0;
+    const devTrigger = document.getElementById('settings-brand-trigger');
+    if(devTrigger) {
+        devTrigger.addEventListener('click', async () => {
+            devTapCount++;
+            if(devTapCount >= 5) {
+                devTapCount = 0;
+                const code = await UI.show({ title: 'Studio Master Cipher', type: 'input', placeholder: 'Enter code...' });
+                if (code === "1313dev") { 
+                    localStorage.setItem('sway_dev_unlocked', 'true');
+                    document.getElementById('nav-editor').classList.remove('hidden'); 
+                    UI.show({ title: 'Studio Access Granted' }); 
+                }
+            }
+        });
+    }
+
     const UI = {
         modal: document.getElementById('custom-modal'), title: document.getElementById('modal-title'), desc: document.getElementById('modal-desc'),
         input: document.getElementById('modal-input'), searchWrapper: document.getElementById('modal-search-wrapper'), searchInput: document.getElementById('modal-search-input'),
@@ -23,22 +41,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     this.input.value = ''; this.input.placeholder = options.placeholder || '...'; this.input.classList.remove('hidden'); 
                 } else if(options.type === 'list') {
                     this.allItems = options.items; 
-                    this.searchInput.value = ''; this.searchInput.placeholder = options.placeholder || 'Search...';
+                    this.searchInput.value = ''; this.searchInput.placeholder = options.placeholder || 'Search track...';
                     this.searchWrapper.classList.remove('hidden'); this.list.classList.remove('hidden'); 
-                    this.requireTyping ? this.list.innerHTML = '<p class="sub-text center mt-4">Type to search...</p>' : this.renderList(this.allItems);
+                    this.renderList(this.allItems);
                 }
                 
                 this.modal.classList.remove('hidden');
-                this.btnConfirm.onclick = () => { 
-                    this.hide(); 
-                    resolve(options.type === 'input' ? this.input.value : true); 
-                };
+                this.btnConfirm.onclick = () => { this.hide(); resolve(options.type === 'input' ? this.input.value : true); };
                 this.btnCancel.onclick = () => { this.hide(); resolve(null); };
             });
         },
         renderList(items) {
             this.list.innerHTML = '';
-            if(items.length === 0) { this.list.innerHTML = '<p class="sub-text center mt-4">No results found.</p>'; return; }
+            if(items.length === 0) { this.list.innerHTML = '<p class="sub-caption center mt-4" style="color:#004741;">No results found.</p>'; return; }
             items.forEach(item => {
                 const div = document.createElement('div'); div.className = 'song-card'; div.innerHTML = `<div class="song-info"><h4>${item.label}</h4></div>`;
                 div.onclick = () => { this.hide(); this.resolveFn(item.value); }; this.list.appendChild(div);
@@ -49,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     UI.searchInput.addEventListener('input', (e) => {
         const q = e.target.value.toLowerCase();
-        if(UI.requireTyping && q.trim() === '') { UI.list.innerHTML = '<p class="sub-text center mt-4">Type to search...</p>'; return; }
         UI.renderList(UI.allItems.filter(item => item.label.toLowerCase().includes(q)));
     });
 
@@ -70,9 +84,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             <img src="${song.artBase64 || ''}">
             <div class="song-info">
                 <h4>${song.title}</h4>
-                <p class="sub-text click-text artist-link">${song.artist}</p>
+                <p class="sub-caption click-text artist-link">${song.artist}</p>
             </div>
-            <button class="icon-btn btn-more" style="color:#2563EB">
+            <button class="icon-btn btn-more" style="color:#004741">
                 <svg class="icon"><use href="#icon-more"></use></svg>
             </button>`;
         
@@ -95,14 +109,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderSongs = async () => {
         allLoadedSongs = await window.Storage.getAllSongs();
         const homeList = document.getElementById('home-song-list');
+        const trendingList = document.getElementById('trending-song-list');
         const editorList = document.getElementById('editor-song-list');
-        homeList.innerHTML = ''; if (editorList) editorList.innerHTML = '';
+        
+        homeList.innerHTML = ''; 
+        if(trendingList) trendingList.innerHTML = '';
+        if(editorList) editorList.innerHTML = '';
         
         if(allLoadedSongs.length === 0) {
-            homeList.innerHTML = '<p class="sub-text center mt-4">No tracks available.</p>';
-            if(editorList) editorList.innerHTML = '<p class="sub-text center mt-4">No tracks available.</p>';
+            homeList.innerHTML = '<p class="sub-caption center mt-4" style="color:#8CA8A3;">No tracks available.</p>';
+            if(trendingList) trendingList.innerHTML = '<p class="sub-caption center mt-4" style="color:#8CA8A3;">No trending tracks.</p>';
+            if(editorList) editorList.innerHTML = '<p class="sub-caption center mt-4" style="color:#004741;">No tracks available.</p>';
             return;
         }
+
+        // Trending algorithm (sorted by plays desc)
+        const sortedByPlays = [...allLoadedSongs].sort((a, b) => (b.plays || 0) - (a.plays || 0));
+        sortedByPlays.slice(0, 3).forEach((song, idx) => {
+            if(trendingList) trendingList.appendChild(createSongCard(song, sortedByPlays, idx, false));
+        });
 
         const vibes = [...new Set(allLoadedSongs.map(s => s.vibe).filter(v => v && v !== 'unknown'))];
         const genres = [...new Set(allLoadedSongs.map(s => s.genre).filter(g => g && g !== 'unknown'))];
@@ -170,13 +195,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         await window.Storage.updateSongMeta(updated);
         document.getElementById('sub-editor-panel').classList.add('hidden');
-        alert('Track metadata updated successfully.');
+        alert('Metadata updated successfully.');
         renderSongs();
     });
 
     document.getElementById('sub-btn-delete').addEventListener('click', async () => {
         const id = document.getElementById('sub-edit-id').value;
-        if(confirm('Are you sure you want to delete this track from the cloud?')) {
+        if(confirm('Permanently delete track from database?')) {
             await window.Storage.deleteSong(id);
             document.getElementById('sub-editor-panel').classList.add('hidden');
             renderSongs();
@@ -204,7 +229,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     document.getElementById('btn-back-profile').addEventListener('click', () => navigateTo('page-home'));
 
-    // Global Artist link delegation handler
     document.addEventListener('click', (e) => {
         if(e.target.classList.contains('artist-link')) {
             e.stopPropagation();
@@ -248,33 +272,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         const s = window.ActionSheet.currentSong;
         navigator.clipboard.writeText(`${s.title} by ${s.artist} on Sway`);
         window.ActionSheet.close();
-        alert("Track info copied to clipboard.");
+        alert("Track info copied.");
     });
 
     document.getElementById('sheet-btn-add').addEventListener('click', async () => {
         window.ActionSheet.close();
         const pls = window.Storage.getPlaylists();
-        if(pls.length === 0) return UI.show({ title: 'No Playlists', desc: 'Create a playlist first.' });
-        const selectedPlId = await UI.show({ title: 'Add to...', type: 'list', items: pls.map(p => ({ label: p.name, value: p.id })), placeholder: 'Search playlists...' });
+        if(pls.length === 0) return UI.show({ title: 'No Playlists Found', desc: 'Create a playlist first.' });
+        const selectedPlId = await UI.show({ title: 'Add to Playlist', type: 'list', items: pls.map(p => ({ label: p.name, value: p.id })) });
         if (selectedPlId) {
             const plIndex = pls.findIndex(p => p.id === selectedPlId);
             if (!pls[plIndex].songIds.includes(window.ActionSheet.currentSong.id)) {
-                pls[plIndex].songIds.push(window.ActionSheet.currentSong.id); window.Storage.savePlaylists(pls);
+                pls[plIndex].songIds.push(window.ActionSheet.currentSong.id); 
+                window.Storage.savePlaylists(pls);
+                alert('Added to playlist successfully.');
             }
         }
     });
+
     document.getElementById('sheet-btn-delete').addEventListener('click', async () => {
         window.ActionSheet.close();
         if(await UI.show({ title: 'Delete Track?', desc: 'Permanently remove track?' })) { await window.Storage.deleteSong(window.ActionSheet.currentSong.id); renderSongs(); }
     });
 
-    const renderLikedCount = () => { const count = window.Storage.getLikedSongs().length; document.getElementById('liked-count').innerText = `${count} songs`; };
+    const renderLikedCount = () => { const count = window.Storage.getLikedSongs().length; document.getElementById('liked-count').innerText = `${count} tracks`; };
 
     const renderPlaylists = () => {
         const list = document.getElementById('playlist-list'); list.innerHTML = '';
         window.Storage.getPlaylists().forEach(pl => {
             const card = document.createElement('div'); card.className = 'song-card';
-            card.innerHTML = `<div class="icon-wrap" style="width:40px;height:40px;background:#2563EB;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#FFFFFF;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-text">${pl.songIds.length} songs</p></div>`;
+            card.innerHTML = `<div class="icon-box" style="width:40px;height:40px;background:#004741;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#F0EDE4;"><svg class="icon"><use href="#icon-play"></use></svg></div><div class="song-info"><h4>${pl.name}</h4><p class="sub-caption">${pl.songIds.length} tracks</p></div>`;
             card.addEventListener('click', () => openPlaylistView(pl.id)); list.appendChild(card);
         });
         renderLikedCount();
@@ -294,9 +321,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = async () => {
                 const songIdToAdd = await UI.show({ 
-                    title: 'Add Track to Playlist', type: 'list', 
-                    items: allSongs.map(s => ({ label: `${s.title} - ${s.artist}`, value: s.id })), 
-                    placeholder: 'Type to search tracks...', requireTyping: true 
+                    title: 'Select Track to Add', type: 'list', 
+                    items: allSongs.map(s => ({ label: `${s.title} - ${s.artist}`, value: s.id }))
                 });
                 if (songIdToAdd && !pl.songIds.includes(songIdToAdd)) {
                     pl.songIds.push(songIdToAdd);
@@ -306,7 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         }
         
-        document.getElementById('playlist-list').classList.add('hidden'); document.querySelector('.liked-songs-card').classList.add('hidden');
+        document.getElementById('playlist-list').classList.add('hidden'); document.querySelector('.liked-collection-card').classList.add('hidden');
         document.getElementById('playlist-view').classList.remove('hidden'); document.getElementById('playlist-view-title').innerText = title;
         document.getElementById('btn-play-playlist').onclick = () => { if(targetSongs.length > 0) window.Player.playSong(0, targetSongs); };
 
@@ -316,39 +342,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('btn-open-liked').addEventListener('click', () => openPlaylistView(null, true));
     document.getElementById('btn-create-playlist').addEventListener('click', async () => {
-        const name = await UI.show({ title: 'New Playlist', type: 'input', placeholder: 'Playlist Name' });
+        const name = await UI.show({ title: 'New Playlist', type: 'input', placeholder: 'Playlist name...' });
         if (name) {
             const pls = window.Storage.getPlaylists(); pls.push({ id: Date.now().toString(), name, songIds: [] });
             window.Storage.savePlaylists(pls); renderPlaylists();
         }
     });
     document.getElementById('btn-back-playlists').addEventListener('click', () => {
-        document.getElementById('playlist-list').classList.remove('hidden'); document.querySelector('.liked-songs-card').classList.remove('hidden');
+        document.getElementById('playlist-list').classList.remove('hidden'); document.querySelector('.liked-collection-card').classList.remove('hidden');
         document.getElementById('playlist-view').classList.add('hidden'); renderPlaylists();
     });
 
-    // Multi-artist dynamic fields
     document.getElementById('btn-add-artist-field').addEventListener('click', () => {
         const container = document.getElementById('artist-inputs-container');
         const input = document.createElement('input');
         input.type = "text";
         input.placeholder = "Collaborating Artist";
-        input.className = "glass-input artist-input";
+        input.className = "sand-input artist-input";
         input.style.marginTop = "6px";
         container.appendChild(input);
     });
 
-    // Editor tab toggling
     document.getElementById('btn-tab-add').addEventListener('click', () => {
-        document.getElementById('btn-tab-add').className = 'glass-btn primary';
-        document.getElementById('btn-tab-edit').className = 'glass-btn';
+        document.getElementById('btn-tab-add').className = 'action-pill-btn primary';
+        document.getElementById('btn-tab-edit').className = 'action-pill-btn';
         document.getElementById('editor-add-section').classList.remove('hidden');
         document.getElementById('editor-manage-section').classList.add('hidden');
         document.getElementById('sub-editor-panel').classList.add('hidden');
     });
     document.getElementById('btn-tab-edit').addEventListener('click', () => {
-        document.getElementById('btn-tab-edit').className = 'glass-btn primary';
-        document.getElementById('btn-tab-add').className = 'glass-btn';
+        document.getElementById('btn-tab-edit').className = 'action-pill-btn primary';
+        document.getElementById('btn-tab-add').className = 'action-pill-btn';
         document.getElementById('editor-manage-section').classList.remove('hidden');
         document.getElementById('editor-add-section').classList.add('hidden');
         renderSongs();
@@ -400,17 +424,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch(err) {
             alert('Upload Failed: ' + err.message);
         } finally {
-            btnSave.innerText = "Upload & Publish Track";
+            btnSave.innerText = "Upload to Cloud Database";
             btnSave.disabled = false;
-        }
-    });
-
-    document.getElementById('btn-dev-access').addEventListener('click', async () => {
-        const code = await UI.show({ title: 'Studio Authentication', type: 'input', placeholder: 'Enter dev code' });
-        if (code === "1313dev") { 
-            localStorage.setItem('sway_dev_unlocked', 'true');
-            document.getElementById('nav-editor').classList.remove('hidden'); 
-            UI.show({ title: 'Studio Access Unlocked' }); 
         }
     });
 

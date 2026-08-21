@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <svg style="display: none;">
@@ -84,15 +84,15 @@
         <main id="page-home" class="page active">
             <header class="page-header mb-4 flex justify-between align-center">
                 <div>
-                    <h1 class="brand-title">Sway</h1>
-                    <p class="sub-text">Welcome back, music lover</p>
+                    <h1 class="brand-title">Welcome Back</h1>
+                    <p class="sub-text">Ready to continue listening</p>
                 </div>
             </header>
             <section class="content-section mb-4">
-                <button id="btn-open-genres" class="btn-pill block center">Browse Genres & Vibes</button>
+                <button id="btn-open-genres" class="glass-btn block center">Browse Genres & Vibes</button>
             </section>
             <section class="content-section">
-                <div class="section-heading mb-3">Recently Added</div>
+                <div class="section-title mb-3" style="font-weight:700; font-size:16px;">Recently Played</div>
                 <div id="home-song-list" class="song-list"></div>
             </section>
         </main>
@@ -105,9 +105,9 @@
 
         <main id="page-search" class="page">
             <header class="search-header mb-4">
-                <div class="search-bar-clean">
-                    <svg class="icon"><use href="#icon-search"></use></svg>
-                    <input type="text" id="search-input" placeholder="Search tracks, artists, genres...">
+                <div class="glass-search">
+                    <svg class="icon" style="color:#667085;"><use href="#icon-search"></use></svg>
+                    <input type="text" id="search-input" placeholder="Search tracks, artists, vibes...">
                 </div>
             </header>
             <div id="search-results" class="song-list"></div>
@@ -116,7 +116,7 @@
         <main id="page-playlists" class="page">
             <header class="header-flex page-header mb-4">
                 <h1 class="brand-title">Library</h1>
-                <button id="btn-create-playlist" class="btn-pill small">New Playlist</button>
+                <button id="btn-create-playlist" class="glass-btn small">New Playlist</button>
             </header>
             
             <div class="liked-songs-card mb-4" id="btn-open-liked">
@@ -130,13 +130,13 @@
                 <button id="btn-back-playlists" class="icon-btn mb-4"><svg class="icon"><use href="#icon-close"></use></svg></button>
                 <h2 id="playlist-view-title" class="brand-title mb-4">Playlist</h2>
                 <div class="playlist-controls header-flex mb-4">
-                    <button id="btn-play-playlist" class="btn-pill small primary">Play All</button>
+                    <button id="btn-play-playlist" class="glass-btn small primary">Play All</button>
                     <div style="display:flex; gap: 8px;">
                         <button id="btn-pl-shuffle" class="icon-btn state-btn"><svg class="icon"><use href="#icon-shuffle"></use></svg></button>
                         <button id="btn-pl-repeat" class="icon-btn state-btn"><svg class="icon"><use href="#icon-repeat"></use></svg></button>
                     </div>
                 </div>
-                <button id="btn-add-to-playlist" class="btn-pill block mb-4">Add Songs</button>
+                <button id="btn-add-to-playlist" class="glass-btn block mb-4">Add Songs</button>
                 <div id="playlist-view-songs" class="song-list"></div>
             </div>
         </main>
@@ -146,7 +146,7 @@
             <p id="profile-subtitle" class="sub-text">CATEGORY</p>
             <h1 id="profile-title" class="brand-title mb-4">Name</h1>
             <div class="header-flex mb-4">
-                <button id="btn-play-profile" class="btn-pill small primary">Play All</button>
+                <button id="btn-play-profile" class="glass-btn small primary">Play All</button>
             </div>
             <div id="profile-song-list" class="song-list"></div>
         </main>
@@ -154,21 +154,21 @@
         <main id="page-settings" class="page">
             <header class="page-header mb-4"><h1 class="brand-title">Settings</h1></header>
             <div class="settings-content">
-                <div class="settings-card clean-box mb-4">
+                <div class="glass-card mb-4">
                     <h4 class="mb-2" style="font-size:15px; font-weight:600;">Streaming Quality</h4>
                     <p class="sub-text mb-4">Buffer songs in high fidelity audio.</p>
                     <div class="settings-row flex justify-between align-center">
                         <span>High Fidelity Mode</span>
-                        <input type="checkbox" id="setting-hq" checked style="accent-color: #31572C; width:18px; height:18px;">
+                        <input type="checkbox" id="setting-hq" checked style="accent-color: #2563EB; width:18px; height:18px;">
                     </div>
                 </div>
-                <div class="settings-card clean-box mb-4">
+                <div class="glass-card mb-4">
                     <h4 class="mb-2" style="font-size:15px; font-weight:600;">Data Management</h4>
                     <p class="sub-text mb-4">Manage local cache and export user backups.</p>
-                    <button id="btn-clear-cache" class="btn-pill block mb-2">Clear Local Cache</button>
-                    <button id="btn-export-data" class="btn-pill block">Export Playlists JSON</button>
+                    <button id="btn-clear-cache" class="glass-btn block mb-2">Clear Local Cache</button>
+                    <button id="btn-export-data" class="glass-btn block">Export Playlists JSON</button>
                 </div>
-                <div id="btn-dev-access" class="dev-card clean-box click-text center" style="font-weight: 600; color: #31572C;">Studio Developer Login</div>
+                <div id="btn-dev-access" class="glass-card click-text center" style="font-weight: 600; color: #2563EB;">Studio Developer Login</div>
             </div>
         </main>
 
@@ -176,38 +176,38 @@
             <header class="page-header mb-4"><h1 class="brand-title">Studio Editor</h1></header>
             
             <div class="editor-mode-switch mb-4" style="display:flex; gap:12px;">
-                <button id="btn-tab-add" class="btn-pill primary" style="flex:1;">Add Track</button>
-                <button id="btn-tab-edit" class="btn-pill" style="flex:1;">Manage Library</button>
+                <button id="btn-tab-add" class="glass-btn primary" style="flex:1;">Add Track</button>
+                <button id="btn-tab-edit" class="glass-btn" style="flex:1;">Manage Library</button>
             </div>
 
             <!-- ADD VIEW -->
-            <div id="editor-add-section" class="clean-box mb-4">
+            <div id="editor-add-section" class="glass-card mb-4">
                 <label class="sub-text block mb-1">Audio File (MP3/WAV)</label>
-                <input type="file" id="edit-audio" accept="audio/*" class="input-cute mb-3">
+                <input type="file" id="edit-audio" accept="audio/*" class="glass-input mb-3">
                 
                 <label class="sub-text block mb-1">Cover Artwork</label>
-                <input type="file" id="edit-art" accept="image/*" class="input-cute mb-3">
+                <input type="file" id="edit-art" accept="image/*" class="glass-input mb-3">
                 
-                <input type="text" id="edit-title" placeholder="Track Title" class="input-cute">
+                <input type="text" id="edit-title" placeholder="Track Title" class="glass-input">
                 
                 <!-- Multi-artist Container -->
                 <div class="multi-artist-wrap mb-3">
                     <div id="artist-inputs-container" style="display:flex; flex-direction:column; gap:8px;">
-                        <input type="text" placeholder="Primary Artist Name" class="input-cute artist-input" style="margin-bottom:0;">
+                        <input type="text" placeholder="Primary Artist Name" class="glass-input artist-input" style="margin-bottom:0;">
                     </div>
-                    <button type="button" id="btn-add-artist-field" class="btn-pill small mt-2">+ Add Collaborating Artist</button>
+                    <button type="button" id="btn-add-artist-field" class="glass-btn small mt-2">+ Add Collaborating Artist</button>
                 </div>
 
-                <input type="text" id="edit-language" placeholder="Language (e.g. English, Hindi)" class="input-cute">
-                <input type="text" id="edit-genre" placeholder="Genre (e.g. Pop, Hip Hop)" class="input-cute">
-                <input type="text" id="edit-vibe" placeholder="Vibe (e.g. Chill, Melancholic)" class="input-cute">
+                <input type="text" id="edit-language" placeholder="Language (e.g. English, Hindi)" class="glass-input">
+                <input type="text" id="edit-genre" placeholder="Genre (e.g. Pop, Hip Hop)" class="glass-input">
+                <input type="text" id="edit-vibe" placeholder="Vibe (e.g. Chill, Melancholic)" class="glass-input">
                 
-                <button id="btn-save-song" class="btn-pill block primary mt-3">Upload & Publish Track</button>
+                <button id="btn-save-song" class="glass-btn block primary mt-3">Upload & Publish Track</button>
             </div>
 
             <!-- EDIT / DELETE VIEW -->
             <div id="editor-manage-section" class="hidden">
-                <div class="search-bar-clean mb-4">
+                <div class="glass-search mb-4">
                     <svg class="icon"><use href="#icon-search"></use></svg>
                     <input type="text" id="editor-search-input" placeholder="Search database to edit or delete...">
                 </div>
@@ -215,22 +215,22 @@
             </div>
 
             <!-- SUB-EDITOR FORM MODAL -->
-            <div id="sub-editor-panel" class="clean-box hidden mb-4" style="border: 2px solid #31572C;">
+            <div id="sub-editor-panel" class="glass-card hidden mb-4" style="border: 2px solid #2563EB;">
                 <h3 class="mb-3" style="font-family:'Outfit';">Edit Track Details</h3>
                 <input type="hidden" id="sub-edit-id">
                 <label class="sub-text block mb-1">Title</label>
-                <input type="text" id="sub-edit-title" class="input-cute mb-2">
+                <input type="text" id="sub-edit-title" class="glass-input mb-2">
                 <label class="sub-text block mb-1">Artists</label>
-                <input type="text" id="sub-edit-artist" class="input-cute mb-2">
+                <input type="text" id="sub-edit-artist" class="glass-input mb-2">
                 <label class="sub-text block mb-1">Language</label>
-                <input type="text" id="sub-edit-language" class="input-cute mb-2">
+                <input type="text" id="sub-edit-language" class="glass-input mb-2">
                 <label class="sub-text block mb-1">Genre</label>
-                <input type="text" id="sub-edit-genre" class="input-cute mb-2">
+                <input type="text" id="sub-edit-genre" class="glass-input mb-2">
                 <label class="sub-text block mb-1">Vibe</label>
-                <input type="text" id="sub-edit-vibe" class="input-cute mb-3">
+                <input type="text" id="sub-edit-vibe" class="glass-input mb-3">
                 <div style="display:flex; gap:10px;">
-                    <button id="sub-btn-update" class="btn-pill primary small" style="flex:1;">Save</button>
-                    <button id="sub-btn-delete" class="btn-pill small" style="background:#FAD2E1; color:#D90429; flex:1;">Delete</button>
+                    <button id="sub-btn-update" class="glass-btn primary small" style="flex:1;">Save</button>
+                    <button id="sub-btn-delete" class="glass-btn small" style="background:rgba(239,68,68,0.15); color:#EF4444; flex:1;">Delete</button>
                 </div>
             </div>
         </main>
@@ -287,14 +287,14 @@
                 </div>
                 <div class="header-flex mb-3">
                     <div>
-                        <h2 id="expanded-title" style="font-family:'Outfit'; font-size:22px; color:#132A13;">Title</h2>
+                        <h2 id="expanded-title" style="font-family:'Outfit'; font-size:22px; color:#1D2939;">Title</h2>
                         <p id="expanded-artist" class="sub-text click-text artist-link" style="font-size:14px; margin-top:4px;">Artist</p>
                     </div>
                     <button id="btn-expanded-like" class="icon-btn" style="width:36px; height:36px;"><svg class="icon"><use href="#icon-heart-outline"></use></svg></button>
                 </div>
                 <div class="progress-container mb-4" style="width:100%;">
                     <input type="range" id="expanded-progress-bar" value="0" max="100" style="height:6px;">
-                    <div class="time-info flex justify-between mt-2" style="font-size:12px; color:#31572C;">
+                    <div class="time-info flex justify-between mt-2" style="font-size:12px; color:#475467;">
                         <span id="expanded-current-time">0:00</span>
                         <span id="expanded-duration">-:-</span>
                     </div>
@@ -302,7 +302,7 @@
                 <div class="controls-row flex justify-around align-center mb-4">
                     <button id="expanded-btn-shuffle" class="icon-btn state-btn"><svg class="icon" style="width:24px;height:24px;"><use href="#icon-shuffle"></use></svg></button>
                     <button id="expanded-btn-prev" class="icon-btn"><svg class="icon" style="width:28px;height:28px;"><use href="#icon-prev"></use></svg></button>
-                    <button id="expanded-btn-playpause" class="icon-btn play-circle" style="width:60px; height:60px; background:#31572C; color:#EAF4EC; border-radius:50%; display:flex; align-items:center; justify-content:center;"><svg class="icon" style="width:28px;height:28px;"><use href="#icon-play"></use></svg></button>
+                    <button id="expanded-btn-playpause" class="icon-btn play-circle" style="width:60px; height:60px; background:#2563EB; color:#FFFFFF; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(37,99,235,0.3);"><svg class="icon" style="width:28px;height:28px;"><use href="#icon-play"></use></svg></button>
                     <button id="expanded-btn-next" class="icon-btn"><svg class="icon" style="width:28px;height:28px;"><use href="#icon-next"></use></svg></button>
                     <button id="expanded-btn-repeat" class="icon-btn state-btn active"><svg class="icon" style="width:24px;height:24px;"><use href="#icon-repeat"></use></svg></button>
                 </div>
@@ -320,25 +320,25 @@
                     <button id="sheet-btn-artist" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>View Artist Profile</span></button>
                     <button id="sheet-btn-add" class="sheet-btn"><svg class="icon"><use href="#icon-plus"></use></svg> <span>Add to Playlist</span></button>
                     <button id="sheet-btn-share" class="sheet-btn"><svg class="icon"><use href="#icon-search"></use></svg> <span>Copy Track Info</span></button>
-                    <button id="sheet-btn-delete" class="sheet-btn hidden" style="color:#D90429;"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Cloud</span></button>
+                    <button id="sheet-btn-delete" class="sheet-btn hidden" style="color:#EF4444;"><svg class="icon"><use href="#icon-trash"></use></svg> <span>Delete from Cloud</span></button>
                 </div>
-                <button id="sheet-btn-close" class="btn-pill mt-4 block center">Cancel</button>
+                <button id="sheet-btn-close" class="glass-btn mt-4 block center">Cancel</button>
             </div>
         </div>
 
         <div id="custom-modal" class="modal-overlay hidden">
-            <div class="modal-box clean-box">
+            <div class="modal-box glass-card">
                 <h3 id="modal-title" class="mb-3" style="font-family:'Outfit';">Title</h3>
                 <p id="modal-desc" class="sub-text hidden mb-3">Description</p>
-                <input type="text" id="modal-input" class="input-cute hidden mb-3" placeholder="...">
-                <div id="modal-search-wrapper" class="search-bar-clean hidden mb-3">
-                    <svg class="icon"><use href="#icon-search"></use></svg>
+                <input type="text" id="modal-input" class="glass-input hidden mb-3" placeholder="...">
+                <div id="modal-search-wrapper" class="glass-search hidden mb-3">
+                    <svg class="icon" style="color:#667085;"><use href="#icon-search"></use></svg>
                     <input type="text" id="modal-search-input" placeholder="Search...">
                 </div>
                 <div id="modal-list" class="song-list hidden" style="max-height: 220px; overflow-y: auto;"></div>
                 <div class="modal-actions flex justify-end gap-2 mt-3">
-                    <button id="modal-btn-cancel" class="btn-pill small">Cancel</button>
-                    <button id="modal-btn-confirm" class="btn-pill small primary">Confirm</button>
+                    <button id="modal-btn-cancel" class="glass-btn small">Cancel</button>
+                    <button id="modal-btn-confirm" class="glass-btn small primary">Confirm</button>
                 </div>
             </div>
         </div>

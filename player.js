@@ -1,3 +1,27 @@
+/**
+ * Universal Duration & Time Formatter
+ * Eliminates concatenation/malformed string bugs like 1:221:16.
+ */
+function formatDuration(value) {
+    if (value === null || value === undefined || isNaN(value) || !isFinite(value) || value < 0) {
+        return "0:00";
+    }
+    let totalSeconds = Number(value);
+    if (totalSeconds > 1000000000) {
+        totalSeconds = totalSeconds / 1000;
+    }
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    const paddedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+
+    if (hours > 0) {
+        const paddedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+        return `${hours}:${paddedMinutes}:${paddedSeconds}`;
+    }
+    return `${minutes}:${paddedSeconds}`;
+}
+
 class MusicPlayer {
     constructor() {
         this.audio = new Audio();
@@ -59,32 +83,39 @@ class MusicPlayer {
             }
         });
 
-        document.getElementById('btn-collapse-player').addEventListener('click', () => {
-            this.expandedPlayer.classList.add('hidden');
-        });
+        const collapseBtn = document.getElementById('btn-collapse-player');
+        if(collapseBtn) {
+            collapseBtn.addEventListener('click', () => {
+                this.expandedPlayer.classList.add('hidden');
+            });
+        }
 
-        this.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
-        this.btnPrev.addEventListener('click', () => this.prevSong());
-        this.btnNext.addEventListener('click', () => this.nextSong());
+        if(this.btnPlayPause) this.btnPlayPause.addEventListener('click', () => this.togglePlayPause());
+        if(this.btnPrev) this.btnPrev.addEventListener('click', () => this.prevSong());
+        if(this.btnNext) this.btnNext.addEventListener('click', () => this.nextSong());
 
-        this.btnShuffle.addEventListener('click', () => {
-            this.isShuffle = !this.isShuffle;
-            this.btnShuffle.style.opacity = this.isShuffle ? '1' : '0.4';
-            this.btnShuffle.classList.toggle('active', this.isShuffle);
-        });
+        if(this.btnShuffle) {
+            this.btnShuffle.addEventListener('click', () => {
+                this.isShuffle = !this.isShuffle;
+                this.btnShuffle.style.opacity = this.isShuffle ? '1' : '0.4';
+                this.btnShuffle.classList.toggle('active', this.isShuffle);
+            });
+        }
 
-        this.btnRepeat.addEventListener('click', () => {
-            if (this.repeatMode === 'all') {
-                this.repeatMode = 'one';
-                this.btnRepeat.style.opacity = '1';
-            } else if (this.repeatMode === 'one') {
-                this.repeatMode = 'off';
-                this.btnRepeat.style.opacity = '0.4';
-            } else {
-                this.repeatMode = 'all';
-                this.btnRepeat.style.opacity = '1';
-            }
-        });
+        if(this.btnRepeat) {
+            this.btnRepeat.addEventListener('click', () => {
+                if (this.repeatMode === 'all') {
+                    this.repeatMode = 'one';
+                    this.btnRepeat.style.opacity = '1';
+                } else if (this.repeatMode === 'one') {
+                    this.repeatMode = 'off';
+                    this.btnRepeat.style.opacity = '0.4';
+                } else {
+                    this.repeatMode = 'all';
+                    this.btnRepeat.style.opacity = '1';
+                }
+            });
+        }
 
         const toggleLikeAction = () => {
             const currentSong = this.queue[this.currentIndex];
@@ -94,8 +125,8 @@ class MusicPlayer {
             if (typeof renderSongs === 'function') renderSongs();
         };
 
-        this.btnPlayerLike.addEventListener('click', toggleLikeAction);
-        this.btnExpandedLike.addEventListener('click', toggleLikeAction);
+        if(this.btnPlayerLike) this.btnPlayerLike.addEventListener('click', toggleLikeAction);
+        if(this.btnExpandedLike) this.btnExpandedLike.addEventListener('click', toggleLikeAction);
     }
 
     setDatabase(songs) {
@@ -124,7 +155,31 @@ class MusicPlayer {
             this.updatePlayerUI();
             this.mainPlayer.classList.remove('hidden');
             window.Storage.incrementPlay(song.id);
+            this.setupMediaSession(song);
         }).catch(err => console.error("Playback error:", err));
+    }
+
+    setupMediaSession(song) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title || 'Sway Track',
+                artist: song.artist || 'Sway Artist',
+                album: 'Sway Master Experience',
+                artwork: [
+                    { src: song.artBase64 || '', sizes: '512x512', type: 'image/png' }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => this.togglePlayPause());
+            navigator.mediaSession.setActionHandler('pause', () => this.togglePlayPause());
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.seekTime && this.audio.duration) {
+                    this.audio.currentTime = details.seekTime;
+                }
+            });
+        }
     }
 
     appendSmartQueue(currentSong) {
@@ -159,6 +214,7 @@ class MusicPlayer {
     }
 
     updatePlayPauseIcon() {
+        if(!this.btnPlayPause) return;
         const iconSymbol = this.isPlaying ? '#icon-pause' : '#icon-play';
         this.btnPlayPause.innerHTML = `<svg class="icon" style="width:30px;height:30px;"><use href="${iconSymbol}"></use></svg>`;
     }
@@ -201,30 +257,24 @@ class MusicPlayer {
     updateProgress() {
         if (!this.audio.duration) return;
         const percent = (this.audio.currentTime / this.audio.duration) * 100;
-        this.progressBar.value = percent;
-        this.expandedProgressBar.value = percent;
+        if(this.progressBar) this.progressBar.value = percent;
+        if(this.expandedProgressBar) this.expandedProgressBar.value = percent;
 
-        this.currentTimeEl.innerText = this.formatTime(this.audio.currentTime);
-        this.durationEl.innerText = this.formatTime(this.audio.duration);
-    }
-
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        if(this.currentTimeEl) this.currentTimeEl.innerText = formatDuration(this.audio.currentTime);
+        if(this.durationEl) this.durationEl.innerText = formatDuration(this.audio.duration);
     }
 
     updatePlayerUI() {
         const song = this.queue[this.currentIndex];
         if (!song) return;
 
-        this.playerTitle.innerText = song.title;
-        this.playerArtist.innerText = song.artist;
-        this.playerArt.src = song.artBase64 || '';
+        if(this.playerTitle) this.playerTitle.innerText = song.title;
+        if(this.playerArtist) this.playerArtist.innerText = song.artist;
+        if(this.playerArt) this.playerArt.src = song.artBase64 || '';
 
-        this.expandedTitle.innerText = song.title;
-        this.expandedArtist.innerText = song.artist;
-        this.expandedArt.src = song.artBase64 || '';
+        if(this.expandedTitle) this.expandedTitle.innerText = song.title;
+        if(this.expandedArtist) this.expandedArtist.innerText = song.artist;
+        if(this.expandedArt) this.expandedArt.src = song.artBase64 || '';
 
         this.updatePlayPauseIcon();
         this.updateLikeButtons(song.id);
@@ -233,12 +283,12 @@ class MusicPlayer {
     updateLikeButtons(songId) {
         const isLiked = window.Storage.isLiked(songId);
         const heartHtml = `<svg class="icon"><use href="${isLiked ? '#icon-heart-filled' : '#icon-heart-outline'}"></use></svg>`;
-        this.btnPlayerLike.innerHTML = heartHtml;
-        this.btnExpandedLike.innerHTML = heartHtml;
+        if(this.btnPlayerLike) this.btnPlayerLike.innerHTML = heartHtml;
+        if(this.btnExpandedLike) this.btnExpandedLike.innerHTML = heartHtml;
     }
 
     openExpandedPlayer() {
-        this.expandedPlayer.classList.remove('hidden');
+        if(this.expandedPlayer) this.expandedPlayer.classList.remove('hidden');
     }
 }
 
